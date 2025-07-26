@@ -1,19 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
 import { Spot } from '@/lib/mock-data';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation2, Sparkles } from 'lucide-react';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import dynamic from 'next/dynamic';
 
-const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+// Dynamic import for mapbox to avoid SSR issues
+const loadMapbox = async () => {
+  const mapboxgl = await import('mapbox-gl');
+  await import('mapbox-gl/dist/mapbox-gl.css');
+  return mapboxgl.default;
+};
 
-if (!mapboxToken) {
-  console.warn('Mapbox token not found. Map functionality will be limited.');
-}
-
-mapboxgl.accessToken = mapboxToken || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
 
 interface MapViewProps {
   spots: Spot[];
@@ -22,12 +22,27 @@ interface MapViewProps {
 
 export default function MapView({ spots, className = '' }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const map = useRef<any>(null);
+  const markers = useRef<any[]>([]);
   const [currentSpotIndex, setCurrentSpotIndex] = useState(0);
+  const [mapboxgl, setMapboxgl] = useState<any>(null);
 
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    const initMapbox = async () => {
+      try {
+        const mapboxModule = await loadMapbox();
+        mapboxModule.accessToken = mapboxToken;
+        setMapboxgl(mapboxModule);
+      } catch (error) {
+        console.error('Failed to load Mapbox:', error);
+      }
+    };
+
+    initMapbox();
+  }, []);
+
+  useEffect(() => {
+    if (!mapContainer.current || map.current || !mapboxgl) return;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -67,7 +82,7 @@ export default function MapView({ spots, className = '' }: MapViewProps) {
     return () => {
       map.current?.remove();
     };
-  }, []);
+  }, [mapboxgl]);
 
   useEffect(() => {
     if (!map.current || spots.length === 0) return;
@@ -158,7 +173,7 @@ export default function MapView({ spots, className = '' }: MapViewProps) {
         pitch: 60
       });
     }
-  }, [spots]);
+  }, [spots, mapboxgl]);
 
   // アニメーション効果
   useEffect(() => {
@@ -191,6 +206,17 @@ export default function MapView({ spots, className = '' }: MapViewProps) {
       setTimeout(() => el.classList.remove('animate-card-bounce'), 500);
     }
   }, [currentSpotIndex, spots]);
+
+  if (!mapboxgl) {
+    return (
+      <div className={`relative ${className} flex items-center justify-center bg-gray-100 rounded-2xl`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">地図を読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative ${className}`}>
