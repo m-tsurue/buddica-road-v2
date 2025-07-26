@@ -1,41 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { ArrowLeft, MapPin, Clock, Route, Play, Download, Share2 } from 'lucide-react';
 import { Spot } from '@/lib/mock-data';
 import Link from 'next/link';
 
 export default function RouteEditor() {
-  // URLパラメータから選択されたスポットを取得（実際はlocalStorageなどから）
-  const [selectedSpots, setSelectedSpots] = useState<Spot[]>([
-    {
-      id: '1',
-      name: '江の島シーキャンドル',
-      description: '湘南のシンボル的な展望灯台',
-      images: ['https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=600&fit=crop'],
-      location: { lat: 35.2999, lng: 139.4813 },
-      tags: ['絶景', '夕日', 'デート'],
-      bestTime: '夕方（16:00-18:00）',
-      duration: '1時間',
-      rating: 4.8,
-      reviews: 2341,
-      vibes: ['ロマンチック', 'フォトジェニック', '開放的']
-    },
-    {
-      id: '3',
-      name: '箱根彫刻の森美術館',
-      description: '自然と芸術が融合した野外美術館',
-      images: ['https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop'],
-      location: { lat: 35.2444, lng: 139.0502 },
-      tags: ['アート', '散策', '写真映え'],
-      bestTime: '午後（13:00-16:00）',
-      duration: '2時間',
-      rating: 4.7,
-      reviews: 3211,
-      vibes: ['アーティスティック', '開放的', 'のんびり']
+  const [selectedSpots, setSelectedSpots] = useState<Spot[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // localStorageから選択されたスポットを取得
+    const storedSpots = localStorage.getItem('selectedSpots');
+    if (storedSpots) {
+      try {
+        const spots = JSON.parse(storedSpots);
+        setSelectedSpots(spots);
+      } catch (error) {
+        console.error('Failed to parse stored spots:', error);
+      }
     }
-  ]);
+    setIsLoading(false);
+  }, []);
 
   const totalDuration = selectedSpots.reduce((total, spot) => {
     const hours = parseInt(spot.duration);
@@ -43,6 +30,37 @@ export default function RouteEditor() {
   }, 0);
 
   const estimatedDriveTime = selectedSpots.length * 0.5; // 仮の移動時間
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">ルートを読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedSpots.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">スポットが選択されていません</h2>
+          <p className="text-gray-600 mb-6">まずはスポットを選んでからルートを作成しましょう</p>
+          <Link href="/">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-lg"
+            >
+              スポット選択に戻る
+            </motion.button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white">

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SwipeCard from '@/components/SwipeCard';
 import { mockSpots, Spot } from '@/lib/mock-data';
 import { Car, Heart, Sparkles, Route } from 'lucide-react';
-import Link from 'next/link';
 
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -81,16 +80,20 @@ export default function Home() {
                   <p className="text-gray-600 mb-6">
                     {selectedSpots.length}個のスポットを選びました
                   </p>
-                  <Link href="/route-editor">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-lg flex items-center gap-2"
-                    >
-                      <Route className="w-5 h-5" />
-                      ルートを作成する
-                    </motion.button>
-                  </Link>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      // 選択したスポットをlocalStorageに保存
+                      localStorage.setItem('selectedSpots', JSON.stringify(selectedSpots));
+                      // ルート編集ページに遷移
+                      window.location.href = '/route-editor';
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-lg flex items-center gap-2"
+                  >
+                    <Route className="w-5 h-5" />
+                    ルートを作成する
+                  </motion.button>
                 </motion.div>
               )}
             </div>
