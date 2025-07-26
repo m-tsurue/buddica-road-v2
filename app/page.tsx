@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Map, TrendingUp, MapPin, Clock, Star, Car } from 'lucide-react';
 import { mockSpots, Spot } from '@/lib/mock-data';
+import { getSpotsByArea } from '@/lib/recommendation';
 
 export default function Home() {
   const [selectedDestination, setSelectedDestination] = useState<Spot | null>(null);
@@ -64,6 +65,21 @@ export default function Home() {
   const handleCategorySearch = (category: string) => {
     setSearchQuery(category);
     performSearch(category);
+  };
+
+  const handleAreaClick = (areaName: string) => {
+    setSearchQuery(areaName);
+    
+    // エリア内のスポットを取得
+    const areaSpots = getSpotsByArea(areaName);
+    
+    if (areaSpots.length > 0) {
+      setSearchResults(areaSpots);
+      setShowResults(true);
+    } else {
+      // エリア内にスポットがない場合は、エリア名で通常検索
+      performSearch(areaName);
+    }
   };
 
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,18 +296,25 @@ export default function Home() {
                     <motion.div
                       key={area.name}
                       whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleAreaClick(area.name)}
                       className="cursor-pointer"
                     >
-                      <div className="relative rounded-xl overflow-hidden mb-2">
+                      <div className="relative rounded-xl overflow-hidden mb-2 border-2 border-transparent hover:border-orange-300 transition-colors">
                         <img
                           src={area.image}
                           alt={area.name}
-                          className="w-full h-24 object-cover"
+                          className="w-full h-24 object-cover transition-transform hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-black/20" />
+                        <div className="absolute inset-0 bg-black/20 hover:bg-black/30 transition-colors" />
                         <div className="absolute bottom-2 left-2 text-white">
                           <div className="font-bold">{area.name}</div>
                           <div className="text-xs">{area.spots}スポット</div>
+                        </div>
+                        
+                        {/* クリック可能であることを示すアイコン */}
+                        <div className="absolute top-2 right-2 w-6 h-6 bg-white/80 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                          <Search className="w-3 h-3 text-gray-600" />
                         </div>
                       </div>
                     </motion.div>

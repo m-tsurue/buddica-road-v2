@@ -101,21 +101,36 @@ export function getSpotsByCategory(category: string): Spot[] {
 
 // エリアベースの推奨スポット
 export function getSpotsByArea(areaName: string): Spot[] {
-  // エリア名に基づく座標範囲（実装では緯度経度の範囲チェック）
-  const areaCoordinates: { [key: string]: { lat: [number, number], lng: [number, number] } } = {
-    '湘南': { lat: [35.25, 35.35], lng: [139.45, 139.55] },
-    '箱根': { lat: [35.20, 35.30], lng: [139.00, 139.10] },
-    '鎌倉': { lat: [35.30, 35.35], lng: [139.50, 139.60] },
-    '富士五湖': { lat: [35.45, 35.55], lng: [138.70, 138.80] }
+  // モックデータに合わせたエリア分類（実際の座標ベース）
+  const areaSpotMapping: { [key: string]: string[] } = {
+    '湘南': ['1'], // 江の島シーキャンドル
+    '箱根': ['3'], // 箱根彫刻の森美術館  
+    '鎌倉': ['2'], // 鎌倉大仏
+    '富士五湖': ['4'], // 河口湖オルゴールの森
+    '横浜': ['5'], // みなとみらいコスモワールド
+    '日光': ['6']  // 日光東照宮
   };
 
-  const area = areaCoordinates[areaName];
-  if (!area) return [];
+  const spotIds = areaSpotMapping[areaName];
+  if (!spotIds) {
+    // エリアマッピングにない場合は座標ベースで検索
+    const areaCoordinates: { [key: string]: { lat: [number, number], lng: [number, number] } } = {
+      '湘南': { lat: [35.25, 35.35], lng: [139.45, 139.55] },
+      '箱根': { lat: [35.20, 35.30], lng: [139.00, 139.10] },
+      '鎌倉': { lat: [35.30, 35.35], lng: [139.50, 139.60] },
+      '富士五湖': { lat: [35.45, 35.55], lng: [138.70, 138.80] }
+    };
 
-  return mockSpots.filter(spot => 
-    spot.location.lat >= area.lat[0] && spot.location.lat <= area.lat[1] &&
-    spot.location.lng >= area.lng[0] && spot.location.lng <= area.lng[1]
-  );
+    const area = areaCoordinates[areaName];
+    if (!area) return [];
+
+    return mockSpots.filter(spot => 
+      spot.location.lat >= area.lat[0] && spot.location.lat <= area.lat[1] &&
+      spot.location.lng >= area.lng[0] && spot.location.lng <= area.lng[1]
+    );
+  }
+
+  return mockSpots.filter(spot => spotIds.includes(spot.id));
 }
 
 // 人気スポットのランキング生成
