@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BUDDICA ROAD - 最高のドライブ体験を
 
-## Getting Started
+ワクワクするドライブプランを作成できるWebアプリケーション。Tinderライクなスワイプ操作でスポットを選び、ドラッグ&ドロップで自由にルートを編集できます。
 
-First, run the development server:
+## 🚗 主な機能
+
+### 1. スポット探索（Tinderライク）
+- 大きな写真でスポットの魅力を体感
+- 右スワイプで「行きたい！」、左スワイプでスキップ
+- Vibesタグで雰囲気を直感的に把握
+
+### 2. ルート編集（ドラッグ&ドロップ）
+- スポットカードをドラッグで並び替え
+- リアルタイムでルート再計算
+- 所要時間と距離を自動表示
+
+### 3. 地図表示（3Dアニメーション）
+- Mapbox GLで美しい3D地図
+- スポット間のルートを視覚化
+- 自動カメラアニメーション
+
+## 🎨 デザインのこだわり
+
+- **ワクワクする演出**: アニメーションや効果音で期待感を演出
+- **直感的な操作**: スワイプやドラッグで簡単操作
+- **美しいグラデーション**: オレンジとレッドの暖かい色調
+
+## 🚀 起動方法
 
 ```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 でアプリケーションが起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 PWA対応（予定）
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+将来的にはPWAとして、以下の機能を実装予定：
+- オフライン対応
+- ホーム画面への追加
+- プッシュ通知
 
-## Learn More
+## 🔧 技術スタック
 
-To learn more about Next.js, take a look at the following resources:
+- **フロントエンド**: Next.js 14, TypeScript, Tailwind CSS
+- **アニメーション**: Framer Motion
+- **地図**: Mapbox GL JS
+- **アイコン**: Lucide React
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📝 今後の拡張予定
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [ ] Supabaseでユーザー認証
+- [ ] Google Places APIで実際のスポット情報
+- [ ] 写真アップロード・思い出記録機能
+- [ ] SNS共有機能
+- [ ] AIによるパーソナライズ提案
 
-## Deploy on Vercel
+## 🎯 開発コンセプト
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+「思い出作り」をテーマに、ドライブの計画から実行、振り返りまで、全ての体験をワクワクするものにすることを目指しています。
