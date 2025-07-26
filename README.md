@@ -67,4 +67,4 @@ http://localhost:3000 でアプリケーションが起動します。
 
 **Last Updated:** 2025-01-26  
 **Version:** 1.0.0  
-**Live Demo:** https://buddica-road.vercel.app/
+**Live Demo:** https://buddica-road-v2.vercel.app/
