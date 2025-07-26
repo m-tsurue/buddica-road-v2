@@ -1,19 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { Spot } from '@/lib/mock-data';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation2, Sparkles } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-// Dynamic import for mapbox to avoid SSR issues
-const loadMapbox = async () => {
-  const mapboxgl = await import('mapbox-gl');
-  await import('mapbox-gl/dist/mapbox-gl.css');
-  return mapboxgl.default;
-};
-
-const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
 
 interface MapViewProps {
   spots: Spot[];
@@ -21,234 +10,40 @@ interface MapViewProps {
 }
 
 export default function MapView({ spots, className = '' }: MapViewProps) {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
-  const markers = useRef<any[]>([]);
-  const [currentSpotIndex, setCurrentSpotIndex] = useState(0);
-  const [mapboxgl, setMapboxgl] = useState<any>(null);
-
-  useEffect(() => {
-    const initMapbox = async () => {
-      try {
-        const mapboxModule = await loadMapbox();
-        mapboxModule.accessToken = mapboxToken;
-        setMapboxgl(mapboxModule);
-      } catch (error) {
-        console.error('Failed to load Mapbox:', error);
-      }
-    };
-
-    initMapbox();
-  }, []);
-
-  useEffect(() => {
-    if (!mapContainer.current || map.current || !mapboxgl) return;
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [139.6503, 35.6762], // 東京
-      zoom: 9,
-      pitch: 45,
-      bearing: -17.6
-    });
-
-    map.current.on('load', () => {
-      // 3D建物を追加
-      const layers = map.current?.getStyle().layers;
-      const labelLayerId = layers?.find(
-        (layer) => layer.type === 'symbol' && layer.layout?.['text-field']
-      )?.id;
-
-      map.current?.addLayer(
-        {
-          id: '3d-buildings',
-          source: 'composite',
-          'source-layer': 'building',
-          filter: ['==', 'extrude', 'true'],
-          type: 'fill-extrusion',
-          minzoom: 15,
-          paint: {
-            'fill-extrusion-color': '#aaa',
-            'fill-extrusion-height': ['get', 'height'],
-            'fill-extrusion-base': ['get', 'min_height'],
-            'fill-extrusion-opacity': 0.6
-          }
-        },
-        labelLayerId
-      );
-    });
-
-    return () => {
-      map.current?.remove();
-    };
-  }, [mapboxgl]);
-
-  useEffect(() => {
-    if (!map.current || spots.length === 0) return;
-
-    // 既存のマーカーを削除
-    markers.current.forEach(marker => marker.remove());
-    markers.current = [];
-
-    // 新しいマーカーを追加
-    spots.forEach((spot, index) => {
-      const el = document.createElement('div');
-      el.className = 'marker';
-      el.innerHTML = `
-        <div class="relative">
-          <div class="absolute -inset-2 bg-orange-500 rounded-full blur-md opacity-60 animate-pulse"></div>
-          <div class="relative w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-            ${index + 1}
-          </div>
-        </div>
-      `;
-
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([spot.location.lng, spot.location.lat])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 }).setHTML(`
-            <div class="p-3">
-              <h3 class="font-bold text-gray-900">${spot.name}</h3>
-              <p class="text-sm text-gray-600 mt-1">${spot.duration}</p>
-            </div>
-          `)
-        )
-        .addTo(map.current!);
-
-      markers.current.push(marker);
-    });
-
-    // ルートラインを描画
-    if (spots.length > 1) {
-      const coordinates = spots.map(spot => [spot.location.lng, spot.location.lat]);
-      
-      if (map.current.getSource('route')) {
-        (map.current.getSource('route') as mapboxgl.GeoJSONSource).setData({
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates
-          }
-        });
-      } else {
-        map.current.addSource('route', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates
-            }
-          }
-        });
-
-        map.current.addLayer({
-          id: 'route',
-          type: 'line',
-          source: 'route',
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
-          paint: {
-            'line-color': '#F97316',
-            'line-width': 4,
-            'line-opacity': 0.75
-          }
-        });
-      }
-
-      // 全てのスポットが見えるように調整
-      const bounds = new mapboxgl.LngLatBounds();
-      coordinates.forEach(coord => bounds.extend(coord as [number, number]));
-      map.current.fitBounds(bounds, { padding: 100 });
-    } else if (spots.length === 1) {
-      // 1つの場合はそこにズーム
-      map.current.flyTo({
-        center: [spots[0].location.lng, spots[0].location.lat],
-        zoom: 14,
-        pitch: 60
-      });
-    }
-  }, [spots, mapboxgl]);
-
-  // アニメーション効果
-  useEffect(() => {
-    if (!map.current || spots.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCurrentSpotIndex((prev) => (prev + 1) % spots.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [spots.length]);
-
-  useEffect(() => {
-    if (!map.current || spots.length === 0) return;
-
-    const spot = spots[currentSpotIndex];
-    map.current.flyTo({
-      center: [spot.location.lng, spot.location.lat],
-      zoom: 15,
-      pitch: 60,
-      bearing: Math.random() * 90 - 45,
-      duration: 3000
-    });
-
-    // マーカーをバウンス
-    const marker = markers.current[currentSpotIndex];
-    if (marker) {
-      const el = marker.getElement();
-      el.classList.add('animate-card-bounce');
-      setTimeout(() => el.classList.remove('animate-card-bounce'), 500);
-    }
-  }, [currentSpotIndex, spots]);
-
-  if (!mapboxgl) {
-    return (
-      <div className={`relative ${className} flex items-center justify-center bg-gray-100 rounded-2xl`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">地図を読み込み中...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className={`relative ${className}`}>
-      <div ref={mapContainer} className="w-full h-full rounded-2xl overflow-hidden" />
-      
-      {/* 現在のスポット情報 */}
-      <AnimatePresence mode="wait">
+    <div className={`relative ${className} flex items-center justify-center bg-gradient-to-br from-orange-100 to-amber-100 rounded-2xl`}>
+      <div className="text-center p-8">
+        <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Navigation2 className="w-8 h-8 text-white" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">地図機能</h3>
+        <p className="text-gray-600 mb-4">
+          {spots.length > 0 ? `${spots.length}個のスポットが選択されています` : 'スポットを選択してください'}
+        </p>
+        
         {spots.length > 0 && (
-          <motion.div
-            key={currentSpotIndex}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold">
-                {currentSpotIndex + 1}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900">{spots[currentSpotIndex].name}</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                  <Navigation2 className="w-3 h-3" />
-                  <span>{spots[currentSpotIndex].duration}</span>
-                  <Sparkles className="w-3 h-3 ml-2" />
-                  <span>{spots[currentSpotIndex].vibes[0]}</span>
+          <div className="space-y-2">
+            {spots.map((spot, index) => (
+              <div key={spot.id} className="flex items-center gap-3 bg-white/80 rounded-lg p-3">
+                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {index + 1}
+                </div>
+                <div className="text-left">
+                  <h4 className="font-medium text-sm">{spot.name}</h4>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Sparkles className="w-3 h-3" />
+                    <span>{spot.vibes[0]}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            ))}
+          </div>
         )}
-      </AnimatePresence>
+        
+        <p className="text-xs text-gray-500 mt-4">
+          ※ 地図機能は開発中です
+        </p>
+      </div>
     </div>
   );
 }
