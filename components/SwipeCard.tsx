@@ -56,7 +56,7 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
 
   return (
     <motion.div
-      className={`absolute w-full h-full ${isTop ? 'z-30' : 'z-20'}`}
+      className={`absolute w-full h-full ${isTop ? 'z-30' : 'z-10'}`}
       style={{ x, y, rotate }}
       drag={isTop}
       dragConstraints={{ left: -300, right: 300, top: -50, bottom: 50 }}
@@ -66,9 +66,9 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
       animate={controls}
       whileTap={{ scale: 0.98 }}
       whileDrag={{ scale: 1.05 }}
-      initial={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.5 }}
+      initial={{ scale: isTop ? 1 : 0.95, opacity: 1 }}
     >
-      <div className="w-full h-full bg-white rounded-3xl overflow-hidden shadow-xl relative">
+      <div className={`w-full h-full bg-white rounded-3xl overflow-hidden shadow-xl relative ${!isTop ? 'brightness-95' : ''}`}>
         {/* 画像エリア */}
         <div 
           className="relative h-[60%] overflow-hidden cursor-pointer"

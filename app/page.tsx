@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SwipeCard from '@/components/SwipeCard';
 import { mockSpots, Spot } from '@/lib/mock-data';
@@ -9,6 +9,33 @@ import { Car, Heart, Sparkles, Route } from 'lucide-react';
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedSpots, setSelectedSpots] = useState<Spot[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // ページロード時にlocalStorageから状態を復元
+  useEffect(() => {
+    const storedSpots = localStorage.getItem('selectedSpots');
+    const storedIndex = localStorage.getItem('currentIndex');
+    
+    if (storedSpots) {
+      try {
+        const spots = JSON.parse(storedSpots);
+        setSelectedSpots(spots);
+      } catch (error) {
+        console.error('Failed to parse stored spots:', error);
+      }
+    }
+    
+    if (storedIndex) {
+      try {
+        const index = parseInt(storedIndex);
+        setCurrentIndex(isNaN(index) ? 0 : index);
+      } catch (error) {
+        console.error('Failed to parse stored index:', error);
+      }
+    }
+    
+    setIsLoaded(true);
+  }, []);
 
   const handleSwipe = (direction: 'left' | 'right') => {
     if (direction === 'right') {
