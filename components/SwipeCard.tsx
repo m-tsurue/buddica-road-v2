@@ -22,7 +22,7 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
   const likeOpacity = useTransform(x, [0, 100], [0, 1]);
   const nopeOpacity = useTransform(x, [-100, 0], [1, 0]);
   
-  const handleDragEnd = async (event: any, info: any) => {
+  const handleDragEnd = async (_event: any, info: any) => {
     const offset = info.offset.x;
     const velocity = info.velocity.x;
     

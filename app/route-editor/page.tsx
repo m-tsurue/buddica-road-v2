@@ -1,61 +1,42 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { ArrowLeft, MapPin, Clock, Route, Play, Download, Share2, RotateCcw } from 'lucide-react';
 import { Spot } from '@/lib/mock-data';
 import Link from 'next/link';
+import { useRouteEditor } from '@/hooks/useRouteEditor';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ActionButton } from '@/components/ui/ActionButton';
+import { ANIMATIONS, ROUTES } from '@/lib/constants';
 
 export default function RouteEditor() {
-  const [selectedSpots, setSelectedSpots] = useState<Spot[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // localStorageから選択されたスポットを取得
-    const storedSpots = localStorage.getItem('selectedSpots');
-    if (storedSpots) {
-      try {
-        const spots = JSON.parse(storedSpots);
-        setSelectedSpots(spots);
-      } catch (error) {
-        console.error('Failed to parse stored spots:', error);
-      }
-    }
-    setIsLoading(false);
-  }, []);
-
-  const totalDuration = selectedSpots.reduce((total, spot) => {
-    const hours = parseInt(spot.duration);
-    return total + (isNaN(hours) ? 1 : hours);
-  }, 0);
-
-  const estimatedDriveTime = selectedSpots.length * 0.5; // 仮の移動時間
+  const {
+    selectedSpots,
+    isLoading,
+    totalDuration,
+    estimatedDriveTime,
+    hasSpots,
+    reorderSpots,
+    resetAll,
+    startNavigation,
+    saveRoute,
+    shareRoute
+  } = useRouteEditor();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">ルートを読み込み中...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="ルートを読み込み中..." />;
   }
 
-  if (selectedSpots.length === 0) {
+  if (!hasSpots) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">スポットが選択されていません</h2>
           <p className="text-gray-600 mb-6">まずはスポットを選んでからルートを作成しましょう</p>
-          <Link href="/">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-lg"
-            >
+          <Link href={ROUTES.HOME}>
+            <ActionButton variant="primary" onClick={() => {}}>
               スポット選択に戻る
-            </motion.button>
+            </ActionButton>
           </Link>
         </div>
       </div>
@@ -69,10 +50,10 @@ export default function RouteEditor() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/">
+              <Link href={ROUTES.HOME}>
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: ANIMATIONS.SCALE_HOVER }}
+                  whileTap={{ scale: ANIMATIONS.SCALE_TAP }}
                   className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5" />
@@ -82,13 +63,9 @@ export default function RouteEditor() {
               
               {/* 最初からやり直すボタン */}
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  localStorage.removeItem('selectedSpots');
-                  localStorage.removeItem('currentIndex');
-                  window.location.href = '/';
-                }}
+                whileHover={{ scale: ANIMATIONS.SCALE_HOVER }}
+                whileTap={{ scale: ANIMATIONS.SCALE_TAP }}
+                onClick={resetAll}
                 className="p-2 rounded-full bg-red-50 hover:bg-red-100 transition-colors"
                 title="最初からやり直す"
               >
@@ -97,14 +74,14 @@ export default function RouteEditor() {
             </div>
             
             <div className="flex items-center gap-2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-4 py-2 bg-orange-600 text-white rounded-full font-medium flex items-center gap-2 shadow-lg"
+              <ActionButton
+                onClick={startNavigation}
+                variant="primary"
+                size="sm"
+                icon={Play}
               >
-                <Play className="w-4 h-4" />
                 ナビ開始
-              </motion.button>
+              </ActionButton>
             </div>
           </div>
         </div>
@@ -130,7 +107,7 @@ export default function RouteEditor() {
                   <div className="text-sm text-gray-600">滞在時間</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-xl">
-                  <div className="text-2xl font-bold text-green-600">{Math.round(estimatedDriveTime * 2) / 2}時間</div>
+                  <div className="text-2xl font-bold text-green-600">{estimatedDriveTime}時間</div>
                   <div className="text-sm text-gray-600">移動時間</div>
                 </div>
               </div>
@@ -147,7 +124,7 @@ export default function RouteEditor() {
               <Reorder.Group
                 axis="y"
                 values={selectedSpots}
-                onReorder={setSelectedSpots}
+                onReorder={reorderSpots}
                 className="space-y-3"
               >
                 <AnimatePresence>
@@ -162,8 +139,8 @@ export default function RouteEditor() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileDrag={{ scale: 1.05, zIndex: 50 }}
+                        whileHover={{ scale: ANIMATIONS.SCALE_HOVER }}
+                        whileDrag={{ scale: ANIMATIONS.SCALE_HOVER, zIndex: 50 }}
                         className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-transparent hover:border-orange-200 transition-all"
                       >
                         {/* 順番番号 */}
@@ -240,32 +217,32 @@ export default function RouteEditor() {
             <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4">
               <h3 className="text-lg font-bold">アクション</h3>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full px-6 py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl font-medium shadow-lg flex items-center justify-center gap-2"
+              <ActionButton
+                onClick={startNavigation}
+                variant="primary"
+                icon={Play}
+                className="w-full"
               >
-                <Play className="w-5 h-5" />
                 ナビゲーション開始
-              </motion.button>
+              </ActionButton>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+              <ActionButton
+                onClick={saveRoute}
+                variant="secondary"
+                icon={Download}
+                className="w-full"
               >
-                <Download className="w-5 h-5" />
                 ルートを保存
-              </motion.button>
+              </ActionButton>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full px-6 py-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+              <ActionButton
+                onClick={shareRoute}
+                variant="outline"
+                icon={Share2}
+                className="w-full bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-200 hover:border-blue-300"
               >
-                <Share2 className="w-5 h-5" />
                 ルートを共有
-              </motion.button>
+              </ActionButton>
             </div>
 
             {/* おすすめタイミング */}

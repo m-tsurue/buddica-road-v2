@@ -1,116 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SwipeCard from '@/components/SwipeCard';
-import { mockSpots, Spot } from '@/lib/mock-data';
-import { generateRecommendations } from '@/lib/recommendation';
+import { Spot } from '@/lib/mock-data';
 import { Car, Heart, Sparkles, Route, RotateCcw } from 'lucide-react';
+import { useSpotSelection } from '@/hooks/useSpotSelection';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ActionButton } from '@/components/ui/ActionButton';
+import { ANIMATIONS } from '@/lib/constants';
 
 export default function SwipePage() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedSpots, setSelectedSpots] = useState<Spot[]>([]);
-  const [primaryDestination, setPrimaryDestination] = useState<Spot | null>(null);
-  const [recommendedSpots, setRecommendedSpots] = useState<Spot[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const {
+    primaryDestination,
+    selectedSpots,
+    currentIndex,
+    recommendedSpots,
+    isLoaded,
+    hasMoreSpots,
+    handleSwipe,
+    reset,
+    proceedToRouteEditor
+  } = useSpotSelection();
 
-  // ページロード時にlocalStorageから状態を復元
-  useEffect(() => {
-    const storedSpots = localStorage.getItem('selectedSpots');
-    const storedIndex = localStorage.getItem('currentIndex');
-    const storedPrimaryDestination = localStorage.getItem('primaryDestination');
-    
-    // 主要目的地を復元
-    if (storedPrimaryDestination) {
-      try {
-        const primary = JSON.parse(storedPrimaryDestination);
-        setPrimaryDestination(primary);
-        
-        // 主要目的地に基づいてレコメンドスポットを生成
-        const recommendations = generateRecommendations(primary, [primary.id]);
-        setRecommendedSpots(recommendations);
-        
-        // 選択済みスポットに主要目的地を追加（まだなければ）
-        let existingSpots: Spot[] = [];
-        if (storedSpots) {
-          existingSpots = JSON.parse(storedSpots);
-        }
-        if (!existingSpots.find(s => s.id === primary.id)) {
-          existingSpots = [primary, ...existingSpots];
-          setSelectedSpots(existingSpots);
-          localStorage.setItem('selectedSpots', JSON.stringify(existingSpots));
-        } else {
-          setSelectedSpots(existingSpots);
-        }
-      } catch (error) {
-        console.error('Failed to parse stored primary destination:', error);
-        // エラーの場合はトップページに戻る
-        window.location.href = '/';
-        return;
-      }
-    } else {
-      // 主要目的地がない場合はトップページに戻る
-      window.location.href = '/';
-      return;
-    }
-    
-    if (storedIndex) {
-      try {
-        const index = parseInt(storedIndex);
-        setCurrentIndex(isNaN(index) ? 0 : index);
-      } catch (error) {
-        console.error('Failed to parse stored index:', error);
-      }
-    }
-    
-    setIsLoaded(true);
-  }, []);
 
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (direction === 'right') {
-      const spot = recommendedSpots[currentIndex];
-      // 重複チェック: 同じIDのスポットが既に選択されていないか確認
-      if (spot && !selectedSpots.find(s => s.id === spot.id)) {
-        const newSelectedSpots = [...selectedSpots, spot];
-        setSelectedSpots(newSelectedSpots);
-        // localStorageにも保存
-        localStorage.setItem('selectedSpots', JSON.stringify(newSelectedSpots));
-      }
-    }
 
-    // アニメーション完了後にcurrentIndexを更新するためのタイマー
-    setTimeout(() => {
-      const newIndex = currentIndex + 1;
-      setCurrentIndex(newIndex);
-      // currentIndexもlocalStorageに保存
-      localStorage.setItem('currentIndex', newIndex.toString());
-    }, 300); // SwipeCardのアニメーション時間と同じ
-  };
-
-  const handleReset = () => {
-    setCurrentIndex(0);
-    setSelectedSpots([]);
-    setPrimaryDestination(null);
-    setRecommendedSpots([]);
-    localStorage.removeItem('selectedSpots');
-    localStorage.removeItem('currentIndex');
-    localStorage.removeItem('primaryDestination');
-    // トップページに戻る
-    window.location.href = '/';
-  };
-
-  const hasMoreSpots = currentIndex < recommendedSpots.length;
-
-  // ローディング中は何も表示しない
   if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">読み込み中...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
@@ -138,9 +53,9 @@ export default function SwipePage() {
                 <motion.button
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleReset}
+                  whileHover={{ scale: ANIMATIONS.SCALE_HOVER }}
+                  whileTap={{ scale: ANIMATIONS.SCALE_TAP }}
+                  onClick={reset}
                   className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
                   title="最初からやり直す"
                 >
@@ -197,30 +112,23 @@ export default function SwipePage() {
                     {selectedSpots.length}個のスポットを選びました
                   </p>
                   <div className="flex flex-col gap-4 w-full max-w-xs">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        // 選択したスポットをlocalStorageに保存
-                        localStorage.setItem('selectedSpots', JSON.stringify(selectedSpots));
-                        // ルート編集ページに遷移
-                        window.location.href = '/route-editor';
-                      }}
-                      className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-lg flex items-center justify-center gap-2"
+                    <ActionButton
+                      onClick={proceedToRouteEditor}
+                      variant="primary"
+                      icon={Route}
+                      className="w-full max-w-xs"
                     >
-                      <Route className="w-5 h-5" />
                       ルートを作成する
-                    </motion.button>
+                    </ActionButton>
                     
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleReset}
-                      className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-medium transition-colors flex items-center justify-center gap-2"
+                    <ActionButton
+                      onClick={reset}
+                      variant="secondary"
+                      icon={RotateCcw}
+                      className="w-full max-w-xs"
                     >
-                      <RotateCcw className="w-4 h-4" />
                       最初からやり直す
-                    </motion.button>
+                    </ActionButton>
                   </div>
                 </motion.div>
               )}
