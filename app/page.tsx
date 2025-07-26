@@ -1,257 +1,266 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import SwipeCard from '@/components/SwipeCard';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Search, Map, TrendingUp, MapPin, Clock, Star, Car } from 'lucide-react';
 import { mockSpots, Spot } from '@/lib/mock-data';
-import { Car, Heart, Sparkles, Route, RotateCcw } from 'lucide-react';
 
 export default function Home() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedSpots, setSelectedSpots] = useState<Spot[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState<Spot | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'search' | 'map' | 'trending'>('search');
 
-  // ページロード時にlocalStorageから状態を復元
-  useEffect(() => {
-    const storedSpots = localStorage.getItem('selectedSpots');
-    const storedIndex = localStorage.getItem('currentIndex');
-    
-    if (storedSpots) {
-      try {
-        const spots = JSON.parse(storedSpots);
-        setSelectedSpots(spots);
-      } catch (error) {
-        console.error('Failed to parse stored spots:', error);
-      }
-    }
-    
-    if (storedIndex) {
-      try {
-        const index = parseInt(storedIndex);
-        setCurrentIndex(isNaN(index) ? 0 : index);
-      } catch (error) {
-        console.error('Failed to parse stored index:', error);
-      }
-    }
-    
-    setIsLoaded(true);
-  }, []);
+  // 人気のカテゴリキーワード
+  const popularCategories = [
+    { name: '温泉', icon: '♨️', count: 234 },
+    { name: '絶景', icon: '🌅', count: 189 },
+    { name: 'グルメ', icon: '🍽️', count: 156 },
+    { name: '歴史', icon: '🏯', count: 98 },
+    { name: 'アート', icon: '🎨', count: 87 },
+    { name: 'カフェ', icon: '☕', count: 145 }
+  ];
 
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (direction === 'right') {
-      const spot = mockSpots[currentIndex];
-      // 重複チェック: 同じIDのスポットが既に選択されていないか確認
-      if (!selectedSpots.find(s => s.id === spot.id)) {
-        const newSelectedSpots = [...selectedSpots, spot];
-        setSelectedSpots(newSelectedSpots);
-        // localStorageにも保存
-        localStorage.setItem('selectedSpots', JSON.stringify(newSelectedSpots));
-      }
-    }
+  // おすすめエリア
+  const recommendedAreas = [
+    { name: '湘南', spots: 45, image: 'https://images.unsplash.com/photo-1544967882-71b4fe52e0b3?w=200&h=120&fit=crop' },
+    { name: '箱根', spots: 38, image: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?w=200&h=120&fit=crop' },
+    { name: '鎌倉', spots: 52, image: 'https://images.unsplash.com/photo-1624253321171-1be53e12f5f4?w=200&h=120&fit=crop' },
+    { name: '富士五湖', spots: 29, image: 'https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?w=200&h=120&fit=crop' }
+  ];
 
-    // アニメーション完了後にcurrentIndexを更新するためのタイマー
-    setTimeout(() => {
-      const newIndex = currentIndex + 1;
-      setCurrentIndex(newIndex);
-      // currentIndexもlocalStorageに保存
-      localStorage.setItem('currentIndex', newIndex.toString());
-    }, 300); // SwipeCardのアニメーション時間と同じ
+  // トレンドスポット（mockSpotsから抜粋）
+  const trendingSpots = mockSpots.slice(0, 3);
+
+  const handleDestinationSelect = (spot: Spot) => {
+    setSelectedDestination(spot);
+    // 選択した目的地をlocalStorageに保存
+    localStorage.setItem('primaryDestination', JSON.stringify(spot));
+    // スワイプページに遷移
+    window.location.href = '/swipe';
   };
 
-  const handleReset = () => {
-    setCurrentIndex(0);
-    setSelectedSpots([]);
-    localStorage.removeItem('selectedSpots');
-    localStorage.removeItem('currentIndex');
-  };
-
-  const hasMoreSpots = currentIndex < mockSpots.length;
-
-  // ローディング中は何も表示しない
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">読み込み中...</p>
-        </div>
-      </div>
+  const handleCategorySearch = (category: string) => {
+    setSearchQuery(category);
+    // カテゴリに基づくスポット検索実装
+    // 現在はモック実装のため、人気スポットをフィルタリング
+    const filteredSpots = mockSpots.filter(spot => 
+      spot.tags.some(tag => tag.includes(category))
     );
-  }
+    console.log(`${category} で検索:`, filteredSpots);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white">
       {/* ヘッダー */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-orange-600 flex items-center gap-2">
-              <Car className="w-6 h-6" />
+          <div className="flex items-center justify-center">
+            <h1 className="text-3xl font-bold text-orange-600 flex items-center gap-3">
+              <Car className="w-8 h-8" />
               BUDDICA ROAD
             </h1>
-            
-            {/* 選択済みスポット数 */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-orange-100 px-3 py-1 rounded-full">
-                <Heart className="w-4 h-4 text-orange-600" />
-                <span className="text-sm font-medium text-orange-700">
-                  {selectedSpots.length}個選択中
-                </span>
-              </div>
-              
-              {/* リセットボタン（選択したスポットがある場合のみ表示） */}
-              {(selectedSpots.length > 0 || currentIndex > 0) && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleReset}
-                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-                  title="最初からやり直す"
-                >
-                  <RotateCcw className="w-4 h-4 text-gray-600" />
-                </motion.button>
-              )}
-            </div>
           </div>
         </div>
       </header>
 
-      {/* メインコンテンツ */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* スワイプエリア */}
-          <div className="flex-1">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                ドライブスポットを探そう
-              </h2>
-              <p className="text-gray-600">
-                左右にスワイプして、行きたいスポットを選んでください
-              </p>
-            </div>
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* メインメッセージ */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            どこに行きますか？
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">
+            最初の目的地を選ぶと、おすすめスポットを提案します
+          </p>
+        </div>
 
-            <div className="relative h-[600px] max-w-md mx-auto">
-              {hasMoreSpots ? (
-                <AnimatePresence>
-                  {mockSpots.slice(currentIndex, currentIndex + 3).map((spot, index) => (
-                    <SwipeCard
-                      key={`${spot.id}-${currentIndex + index}`}
-                      spot={spot}
-                      onSwipe={handleSwipe}
-                      isTop={index === 0}
-                    />
+        {/* 3つのメインアクション */}
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          {/* キーワード検索 */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={`p-6 rounded-3xl border-2 cursor-pointer transition-all ${
+              activeTab === 'search' 
+                ? 'border-orange-300 bg-orange-50' 
+                : 'border-gray-200 bg-white hover:border-orange-200'
+            }`}
+            onClick={() => setActiveTab('search')}
+          >
+            <Search className="w-8 h-8 text-orange-600 mb-4" />
+            <h3 className="text-xl font-bold mb-2">キーワードで探す</h3>
+            <p className="text-gray-600 text-sm">温泉、絶景、グルメなど</p>
+          </motion.div>
+
+          {/* 地図で選ぶ */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={`p-6 rounded-3xl border-2 cursor-pointer transition-all ${
+              activeTab === 'map' 
+                ? 'border-orange-300 bg-orange-50' 
+                : 'border-gray-200 bg-white hover:border-orange-200'
+            }`}
+            onClick={() => setActiveTab('map')}
+          >
+            <Map className="w-8 h-8 text-orange-600 mb-4" />
+            <h3 className="text-xl font-bold mb-2">地図から選ぶ</h3>
+            <p className="text-gray-600 text-sm">位置を見ながら探す</p>
+          </motion.div>
+
+          {/* 人気スポット */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={`p-6 rounded-3xl border-2 cursor-pointer transition-all ${
+              activeTab === 'trending' 
+                ? 'border-orange-300 bg-orange-50' 
+                : 'border-gray-200 bg-white hover:border-orange-200'
+            }`}
+            onClick={() => setActiveTab('trending')}
+          >
+            <TrendingUp className="w-8 h-8 text-orange-600 mb-4" />
+            <h3 className="text-xl font-bold mb-2">人気スポット</h3>
+            <p className="text-gray-600 text-sm">今注目の場所</p>
+          </motion.div>
+        </div>
+
+        {/* コンテンツエリア */}
+        <div className="bg-white rounded-3xl p-8 shadow-sm">
+          {activeTab === 'search' && (
+            <div>
+              <h3 className="text-2xl font-bold mb-6">🔍 キーワードで探す</h3>
+              
+              {/* 検索バー */}
+              <div className="relative mb-8">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="行きたい場所やカテゴリを入力..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl text-lg focus:border-orange-300 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* 人気カテゴリ */}
+              <div className="mb-8">
+                <h4 className="text-lg font-bold mb-4">人気のカテゴリ</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {popularCategories.map((category) => (
+                    <motion.button
+                      key={category.name}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleCategorySearch(category.name)}
+                      className="flex items-center gap-3 p-4 bg-gray-50 hover:bg-orange-50 rounded-xl transition-colors text-left"
+                    >
+                      <span className="text-2xl">{category.icon}</span>
+                      <div>
+                        <div className="font-medium">{category.name}</div>
+                        <div className="text-sm text-gray-500">{category.count}件</div>
+                      </div>
+                    </motion.button>
                   ))}
-                </AnimatePresence>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center h-full text-center bg-white rounded-3xl shadow-xl p-8"
-                >
-                  <Sparkles className="w-16 h-16 text-orange-500 mb-4" />
-                  <h3 className="text-2xl font-bold mb-2">全てチェック完了！</h3>
-                  <p className="text-gray-600 mb-6">
-                    {selectedSpots.length}個のスポットを選びました
-                  </p>
-                  <div className="flex flex-col gap-4 w-full max-w-xs">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        // 選択したスポットをlocalStorageに保存
-                        localStorage.setItem('selectedSpots', JSON.stringify(selectedSpots));
-                        // ルート編集ページに遷移
-                        window.location.href = '/route-editor';
-                      }}
-                      className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-lg flex items-center justify-center gap-2"
-                    >
-                      <Route className="w-5 h-5" />
-                      ルートを作成する
-                    </motion.button>
-                    
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleReset}
-                      className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      最初からやり直す
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-
-            {/* 操作説明 */}
-            {hasMoreSpots && (
-              <div className="text-center mt-8 text-gray-600">
-                <p className="mb-4">スワイプまたはボタンで選択</p>
-                <div className="flex items-center justify-center gap-8">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">←</span>
-                    </div>
-                    <span className="text-sm">スキップ</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">→</span>
-                    </div>
-                    <span className="text-sm">行きたい！</span>
-                  </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* サイドバー：選択済みスポット */}
-          <div className="w-full lg:w-96">
-            <div className="bg-white rounded-2xl p-6 shadow-sm sticky top-24">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Heart className="w-5 h-5 text-orange-500" />
-                選んだスポット ({selectedSpots.length})
-              </h3>
-              
-              {selectedSpots.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <Sparkles className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>まだスポットが選ばれていません</p>
-                  <p className="text-sm">右にスワイプして追加しましょう</p>
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  <AnimatePresence>
-                    {selectedSpots.map((spot, index) => (
-                      <motion.div
-                        key={`selected-${spot.id}-${index}`}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
-                          {index + 1}
-                        </div>
+              {/* おすすめエリア */}
+              <div>
+                <h4 className="text-lg font-bold mb-4">おすすめエリア</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {recommendedAreas.map((area) => (
+                    <motion.div
+                      key={area.name}
+                      whileHover={{ scale: 1.05 }}
+                      className="cursor-pointer"
+                    >
+                      <div className="relative rounded-xl overflow-hidden mb-2">
                         <img
-                          src={spot.images[0]}
-                          alt={spot.name}
-                          className="w-12 h-12 rounded-lg object-cover"
+                          src={area.image}
+                          alt={area.name}
+                          className="w-full h-24 object-cover"
                         />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">{spot.name}</h4>
-                          <p className="text-xs text-gray-500">{spot.duration}</p>
+                        <div className="absolute inset-0 bg-black/20" />
+                        <div className="absolute bottom-2 left-2 text-white">
+                          <div className="font-bold">{area.name}</div>
+                          <div className="text-xs">{area.spots}スポット</div>
                         </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
+
+          {activeTab === 'map' && (
+            <div className="text-center py-12">
+              <Map className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold mb-4">🗺️ 地図から選ぶ</h3>
+              <p className="text-gray-600 mb-6">地図機能は次回アップデートで実装予定です</p>
+              <p className="text-sm text-gray-500">現在は人気スポットからお選びください</p>
+            </div>
+          )}
+
+          {activeTab === 'trending' && (
+            <div>
+              <h3 className="text-2xl font-bold mb-6">🔥 今話題のスポット</h3>
+              <div className="space-y-4">
+                {trendingSpots.map((spot, index) => (
+                  <motion.div
+                    key={spot.id}
+                    whileHover={{ scale: 1.02 }}
+                    onClick={() => handleDestinationSelect(spot)}
+                    className="flex items-center gap-4 p-4 border-2 border-gray-200 hover:border-orange-300 rounded-xl cursor-pointer transition-all"
+                  >
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+                      {index + 1}
+                    </div>
+                    
+                    <img
+                      src={spot.images[0]}
+                      alt={spot.name}
+                      className="w-20 h-20 rounded-xl object-cover"
+                    />
+                    
+                    <div className="flex-1">
+                      <h4 className="text-xl font-bold mb-1">{spot.name}</h4>
+                      <p className="text-gray-600 text-sm mb-2 line-clamp-2">{spot.description}</p>
+                      
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span>{spot.rating}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{spot.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{spot.bestTime}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-2">
+                        {spot.tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-xs text-gray-500 mb-1">今週の人気</div>
+                      <div className="text-2xl">🔥</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
