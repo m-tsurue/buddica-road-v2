@@ -40,13 +40,34 @@ export default function Home() {
   const handleSwipe = (direction: 'left' | 'right') => {
     if (direction === 'right') {
       const spot = mockSpots[currentIndex];
-      setSelectedSpots([...selectedSpots, spot]);
+      // 重複チェック: 同じIDのスポットが既に選択されていないか確認
+      if (!selectedSpots.find(s => s.id === spot.id)) {
+        const newSelectedSpots = [...selectedSpots, spot];
+        setSelectedSpots(newSelectedSpots);
+        // localStorageにも保存
+        localStorage.setItem('selectedSpots', JSON.stringify(newSelectedSpots));
+      }
     }
 
-    setCurrentIndex(currentIndex + 1);
+    const newIndex = currentIndex + 1;
+    setCurrentIndex(newIndex);
+    // currentIndexもlocalStorageに保存
+    localStorage.setItem('currentIndex', newIndex.toString());
   };
 
   const hasMoreSpots = currentIndex < mockSpots.length;
+
+  // ローディング中は何も表示しない
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-white">
@@ -89,7 +110,7 @@ export default function Home() {
                 <AnimatePresence>
                   {mockSpots.slice(currentIndex, currentIndex + 3).map((spot, index) => (
                     <SwipeCard
-                      key={spot.id}
+                      key={`${spot.id}-${currentIndex + index}`}
                       spot={spot}
                       onSwipe={handleSwipe}
                       isTop={index === 0}
@@ -166,7 +187,7 @@ export default function Home() {
                   <AnimatePresence>
                     {selectedSpots.map((spot, index) => (
                       <motion.div
-                        key={spot.id}
+                        key={`selected-${spot.id}-${index}`}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
