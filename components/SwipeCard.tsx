@@ -56,7 +56,7 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
 
   return (
     <motion.div
-      className={`absolute w-full h-full touch-none ${isTop ? 'z-30' : 'z-20'}`}
+      className={`absolute w-full h-full ${isTop ? 'z-30' : 'z-20'}`}
       style={{ x, y, rotate }}
       drag={isTop}
       dragConstraints={{ left: -300, right: 300, top: -50, bottom: 50 }}
@@ -68,7 +68,7 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
       whileDrag={{ scale: 1.05 }}
       initial={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.5 }}
     >
-      <div className="w-full h-full bg-white rounded-3xl overflow-hidden card-shadow relative">
+      <div className="w-full h-full bg-white rounded-3xl overflow-hidden shadow-xl relative">
         {/* 画像エリア */}
         <div 
           className="relative h-[60%] overflow-hidden cursor-pointer"
@@ -99,13 +99,13 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
           
           {/* スワイプヒント */}
           <motion.div
-            className="swipe-hint like"
+            className="absolute top-20 right-20 px-4 py-2 bg-green-500 text-white rounded-full font-bold text-lg transform rotate-12"
             style={{ opacity: likeOpacity }}
           >
             <Heart className="w-6 h-6 fill-current" />
           </motion.div>
           <motion.div
-            className="swipe-hint nope"
+            className="absolute top-20 left-20 px-4 py-2 bg-red-500 text-white rounded-full font-bold text-lg transform -rotate-12"
             style={{ opacity: nopeOpacity }}
           >
             <X className="w-6 h-6" />
@@ -136,7 +136,7 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
           </div>
           
           {/* 説明 */}
-          <p className="text-gray-600 line-clamp-2">{spot.description}</p>
+          <p className="text-gray-600 text-sm line-clamp-2">{spot.description}</p>
           
           {/* アイコン情報 */}
           <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -166,23 +166,25 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
           </div>
         </div>
         
-        {/* デバッグ用ボタン（開発時のみ） */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
-            <button
-              onClick={() => onSwipe('left')}
-              className="bg-red-500 text-white p-2 rounded-full"
-            >
-              ← Skip
-            </button>
-            <button
-              onClick={() => onSwipe('right')}
-              className="bg-green-500 text-white p-2 rounded-full"
-            >
-              Like →
-            </button>
-          </div>
-        )}
+        {/* アクションボタン */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
+          <motion.button
+            onClick={() => onSwipe('left')}
+            className="w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-200"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <X className="w-6 h-6 text-red-500" />
+          </motion.button>
+          <motion.button
+            onClick={() => onSwipe('right')}
+            className="w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-200"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Heart className="w-6 h-6 text-green-500" />
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );
