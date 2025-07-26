@@ -7,7 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation2, Sparkles } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+if (!mapboxToken) {
+  console.warn('Mapbox token not found. Map functionality will be limited.');
+}
+
+mapboxgl.accessToken = mapboxToken || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
 
 interface MapViewProps {
   spots: Spot[];
