@@ -1,0 +1,33 @@
+あなたは BUDDICA ROAD というドライブルート提案アプリ（Next.js + TypeScript）の開発を引き継ぎます。
+
+【現在の状況】
+✅ 完成済み: ホームページ（目的地選択）→ スワイプ選択 → ルート編集
+⏳ 次のタスク: 地図機能実装（Mapbox統合）
+
+【重要ファイル】
+- app/page.tsx: ホームページ（3つの発見方法）
+- app/swipe/page.tsx: スワイプ選択画面  
+- app/route-editor/page.tsx: ルート編集
+- lib/recommendation.ts: AIレコメンドエンジン
+- components/SwipeCard.tsx: メインのスワイプカード
+
+【技術スタック】
+Next.js 15, TypeScript, Tailwind CSS, Framer Motion, Vercel
+
+【必読ドキュメント】
+1. README.md - プロジェクト概要
+2. HANDOVER_GUIDE.md - 詳細技術ガイド
+3. DEVELOPMENT_ROADMAP.md - 今後の開発計画
+
+【最初にやること】
+1. 現在のコードベースを理解
+2. ローカルで npm run dev して動作確認
+3. HANDOVER_GUIDE.md の「すぐに始められるタスク」から地図機能実装開始
+
+【本番URL】
+https://buddica-road-v2.vercel.app/
+
+【リポジトリ】
+https://github.com/m-tsurue/buddica-road-v2
+
+準備ができたら「現在の実装状況を確認しました」と教えてください。質問があれば遠慮なくどうぞ。
