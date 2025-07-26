@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Map, TrendingUp, MapPin, Clock, Star, Car } from 'lucide-react';
 import { mockSpots, Spot } from '@/lib/mock-data';
@@ -9,6 +9,9 @@ export default function Home() {
   const [selectedDestination, setSelectedDestination] = useState<Spot | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'search' | 'map' | 'trending'>('search');
+  const [searchResults, setSearchResults] = useState<Spot[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 人気のカテゴリキーワード
   const popularCategories = [
@@ -39,14 +42,40 @@ export default function Home() {
     window.location.href = '/swipe';
   };
 
+  const performSearch = (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    // キーワードに基づくスポット検索
+    const filteredSpots = mockSpots.filter(spot => 
+      spot.name.toLowerCase().includes(query.toLowerCase()) ||
+      spot.description.toLowerCase().includes(query.toLowerCase()) ||
+      spot.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase())) ||
+      spot.vibes.some(vibe => vibe.toLowerCase().includes(query.toLowerCase()))
+    );
+    
+    setSearchResults(filteredSpots);
+    setShowResults(true);
+  };
+
   const handleCategorySearch = (category: string) => {
     setSearchQuery(category);
-    // カテゴリに基づくスポット検索実装
-    // 現在はモック実装のため、人気スポットをフィルタリング
-    const filteredSpots = mockSpots.filter(spot => 
-      spot.tags.some(tag => tag.includes(category))
-    );
-    console.log(`${category} で検索:`, filteredSpots);
+    performSearch(category);
+  };
+
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    // リアルタイム検索（入力停止後300ms後に実行）
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(query);
+    }, 300);
   };
 
   return (
@@ -135,13 +164,92 @@ export default function Home() {
                   type="text"
                   placeholder="行きたい場所やカテゴリを入力..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchInput}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      performSearch(searchQuery);
+                    }
+                  }}
                   className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl text-lg focus:border-orange-300 focus:outline-none transition-colors"
                 />
               </div>
 
+              {/* 検索結果 */}
+              {showResults && (
+                <div className="mb-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-bold">
+                      「{searchQuery}」の検索結果 ({searchResults.length}件)
+                    </h4>
+                    <button
+                      onClick={() => {
+                        setShowResults(false);
+                        setSearchQuery('');
+                        setSearchResults([]);
+                      }}
+                      className="text-sm text-gray-500 hover:text-gray-700"
+                    >
+                      ✕ 閉じる
+                    </button>
+                  </div>
+                  
+                  {searchResults.length > 0 ? (
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {searchResults.map((spot) => (
+                        <motion.div
+                          key={spot.id}
+                          whileHover={{ scale: 1.02 }}
+                          onClick={() => handleDestinationSelect(spot)}
+                          className="flex items-center gap-4 p-4 border-2 border-gray-200 hover:border-orange-300 rounded-xl cursor-pointer transition-all"
+                        >
+                          <img
+                            src={spot.images[0]}
+                            alt={spot.name}
+                            className="w-16 h-16 rounded-xl object-cover"
+                          />
+                          
+                          <div className="flex-1">
+                            <h5 className="font-bold text-lg mb-1">{spot.name}</h5>
+                            <p className="text-gray-600 text-sm mb-2 line-clamp-2">{spot.description}</p>
+                            
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                <span>{spot.rating}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                <span>{spot.duration}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-2 mt-2">
+                              {spot.tags.slice(0, 3).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Search className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>「{searchQuery}」に一致するスポットが見つかりませんでした</p>
+                      <p className="text-sm mt-2">別のキーワードで検索してみてください</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* 人気カテゴリ */}
-              <div className="mb-8">
+              {!showResults && (
+                <div className="mb-8">
                 <h4 className="text-lg font-bold mb-4">人気のカテゴリ</h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {popularCategories.map((category) => (
@@ -161,9 +269,11 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+              )}
 
               {/* おすすめエリア */}
-              <div>
+              {!showResults && (
+                <div>
                 <h4 className="text-lg font-bold mb-4">おすすめエリア</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {recommendedAreas.map((area) => (
@@ -188,6 +298,7 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+              )}
             </div>
           )}
 
