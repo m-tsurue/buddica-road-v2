@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { ArrowLeft, MapPin, Clock, Route, Play, Download, Share2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Route, Play, Download, Share2, RotateCcw } from 'lucide-react';
 import { Spot } from '@/lib/mock-data';
 import Link from 'next/link';
 
@@ -79,6 +79,21 @@ export default function RouteEditor() {
                 </motion.button>
               </Link>
               <h1 className="text-xl font-bold text-gray-900">ルート編集</h1>
+              
+              {/* 最初からやり直すボタン */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  localStorage.removeItem('selectedSpots');
+                  localStorage.removeItem('currentIndex');
+                  window.location.href = '/';
+                }}
+                className="p-2 rounded-full bg-red-50 hover:bg-red-100 transition-colors"
+                title="最初からやり直す"
+              >
+                <RotateCcw className="w-5 h-5 text-red-600" />
+              </motion.button>
             </div>
             
             <div className="flex items-center gap-2">

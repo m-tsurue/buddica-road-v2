@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SwipeCard from '@/components/SwipeCard';
 import { mockSpots, Spot } from '@/lib/mock-data';
-import { Car, Heart, Sparkles, Route } from 'lucide-react';
+import { Car, Heart, Sparkles, Route, RotateCcw } from 'lucide-react';
 
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -58,6 +58,13 @@ export default function Home() {
     }, 300); // SwipeCardのアニメーション時間と同じ
   };
 
+  const handleReset = () => {
+    setCurrentIndex(0);
+    setSelectedSpots([]);
+    localStorage.removeItem('selectedSpots');
+    localStorage.removeItem('currentIndex');
+  };
+
   const hasMoreSpots = currentIndex < mockSpots.length;
 
   // ローディング中は何も表示しない
@@ -84,11 +91,28 @@ export default function Home() {
             </h1>
             
             {/* 選択済みスポット数 */}
-            <div className="flex items-center gap-2 bg-orange-100 px-3 py-1 rounded-full">
-              <Heart className="w-4 h-4 text-orange-600" />
-              <span className="text-sm font-medium text-orange-700">
-                {selectedSpots.length}個選択中
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-orange-100 px-3 py-1 rounded-full">
+                <Heart className="w-4 h-4 text-orange-600" />
+                <span className="text-sm font-medium text-orange-700">
+                  {selectedSpots.length}個選択中
+                </span>
+              </div>
+              
+              {/* リセットボタン（選択したスポットがある場合のみ表示） */}
+              {(selectedSpots.length > 0 || currentIndex > 0) && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleReset}
+                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                  title="最初からやり直す"
+                >
+                  <RotateCcw className="w-4 h-4 text-gray-600" />
+                </motion.button>
+              )}
             </div>
           </div>
         </div>
@@ -131,20 +155,32 @@ export default function Home() {
                   <p className="text-gray-600 mb-6">
                     {selectedSpots.length}個のスポットを選びました
                   </p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      // 選択したスポットをlocalStorageに保存
-                      localStorage.setItem('selectedSpots', JSON.stringify(selectedSpots));
-                      // ルート編集ページに遷移
-                      window.location.href = '/route-editor';
-                    }}
-                    className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-lg flex items-center gap-2"
-                  >
-                    <Route className="w-5 h-5" />
-                    ルートを作成する
-                  </motion.button>
+                  <div className="flex flex-col gap-4 w-full max-w-xs">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        // 選択したスポットをlocalStorageに保存
+                        localStorage.setItem('selectedSpots', JSON.stringify(selectedSpots));
+                        // ルート編集ページに遷移
+                        window.location.href = '/route-editor';
+                      }}
+                      className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <Route className="w-5 h-5" />
+                      ルートを作成する
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleReset}
+                      className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      最初からやり直す
+                    </motion.button>
+                  </div>
                 </motion.div>
               )}
             </div>
