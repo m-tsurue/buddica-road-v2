@@ -49,10 +49,13 @@ export default function Home() {
       }
     }
 
-    const newIndex = currentIndex + 1;
-    setCurrentIndex(newIndex);
-    // currentIndexもlocalStorageに保存
-    localStorage.setItem('currentIndex', newIndex.toString());
+    // アニメーション完了後にcurrentIndexを更新するためのタイマー
+    setTimeout(() => {
+      const newIndex = currentIndex + 1;
+      setCurrentIndex(newIndex);
+      // currentIndexもlocalStorageに保存
+      localStorage.setItem('currentIndex', newIndex.toString());
+    }, 300); // SwipeCardのアニメーション時間と同じ
   };
 
   const hasMoreSpots = currentIndex < mockSpots.length;
