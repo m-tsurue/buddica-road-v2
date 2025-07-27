@@ -29,6 +29,22 @@ export function useRouteEditor() {
     setSelectedSpots(newOrder);
   };
 
+  // スポット削除
+  const removeSpot = (spotId: string) => {
+    setSelectedSpots(prev => prev.filter(spot => spot.id !== spotId));
+  };
+
+  // スポット追加
+  const addSpot = (spot: Spot) => {
+    setSelectedSpots(prev => {
+      // 重複チェック
+      if (prev.some(existingSpot => existingSpot.id === spot.id)) {
+        return prev;
+      }
+      return [...prev, spot];
+    });
+  };
+
   // 最初からやり直し
   const resetAll = () => {
     setSelectedSpots([]);
@@ -70,6 +86,8 @@ export function useRouteEditor() {
 
     // Actions
     reorderSpots,
+    removeSpot,
+    addSpot,
     resetAll,
     startNavigation,
     saveRoute,

@@ -68,27 +68,27 @@ export default function SwipePage() {
       </header>
 
       {/* メインコンテンツ */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <main className="max-w-7xl mx-auto px-4 py-4 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* スワイプエリア */}
           <div className="flex-1">
-            <div className="text-center mb-8">
+            <div className="text-center mb-4 sm:mb-8">
               {primaryDestination && (
-                <div className="mb-4">
-                  <p className="text-sm text-orange-600 font-medium">
+                <div className="mb-2 sm:mb-4">
+                  <p className="text-xs sm:text-sm text-orange-600 font-medium">
                     📍 {primaryDestination.name} をベースにレコメンド
                   </p>
                 </div>
               )}
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                おすすめスポットを選ぼう
+              <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+                ドライブを彩るスポットを選ぼう
               </h2>
-              <p className="text-gray-600">
-                あなたの目的地に合わせて厳選したスポットです
+              <p className="text-sm sm:text-base text-gray-600">
+                素敵な寄り道で旅をもっと特別にしませんか？
               </p>
             </div>
 
-            <div className="relative h-[600px] max-w-md mx-auto">
+            <div className="relative h-[400px] sm:h-[600px] max-w-md mx-auto">
               {hasMoreSpots ? (
                 <AnimatePresence>
                   {recommendedSpots.slice(currentIndex, currentIndex + 3).map((spot, index) => (
@@ -134,44 +134,24 @@ export default function SwipePage() {
               )}
             </div>
 
-            {/* 操作説明 */}
-            {hasMoreSpots && (
-              <div className="text-center mt-8 text-gray-600">
-                <p className="mb-4">スワイプまたはボタンで選択</p>
-                <div className="flex items-center justify-center gap-8">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">←</span>
-                    </div>
-                    <span className="text-sm">スキップ</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">→</span>
-                    </div>
-                    <span className="text-sm">行きたい！</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* サイドバー：選択済みスポット */}
+          {/* サイドバー：選択済みスポット - モバイル最適化 */}
           <div className="w-full lg:w-96">
-            <div className="bg-white rounded-2xl p-6 shadow-sm sticky top-24">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Heart className="w-5 h-5 text-orange-500" />
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm sticky top-20 sm:top-24">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                 選んだスポット ({selectedSpots.length})
               </h3>
               
               {selectedSpots.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <Sparkles className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>まだスポットが選ばれていません</p>
-                  <p className="text-sm">右にスワイプして追加しましょう</p>
+                <div className="text-center py-6 sm:py-12 text-gray-500">
+                  <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 text-gray-300" />
+                  <p className="text-sm sm:text-base">まだスポットが選ばれていません</p>
+                  <p className="text-xs sm:text-sm">右にスワイプして追加しましょう</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                <div className="space-y-2 sm:space-y-3 max-h-[200px] sm:max-h-[300px] lg:max-h-[400px] overflow-y-auto">
                   <AnimatePresence>
                     {selectedSpots.map((spot, index) => (
                       <motion.div
@@ -180,18 +160,18 @@ export default function SwipePage() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ delay: index * 0.05 }}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                        className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-gray-100 transition-colors"
                       >
-                        <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-orange-500 rounded-md sm:rounded-lg flex items-center justify-center text-white font-bold text-xs sm:text-sm">
                           {index + 1}
                         </div>
                         <img
                           src={spot.images[0]}
                           alt={spot.name}
-                          className="w-12 h-12 rounded-lg object-cover"
+                          className="w-8 h-8 sm:w-12 sm:h-12 rounded-md sm:rounded-lg object-cover"
                         />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">{spot.name}</h4>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-xs sm:text-sm truncate">{spot.name}</h4>
                           <p className="text-xs text-gray-500">{spot.duration}</p>
                         </div>
                       </motion.div>
@@ -203,6 +183,22 @@ export default function SwipePage() {
           </div>
         </div>
       </main>
+
+      {/* スティッキーCTAボタン */}
+      {selectedSpots.length > 0 && (
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 z-30">
+          <div className="max-w-7xl mx-auto">
+            <ActionButton
+              onClick={proceedToRouteEditor}
+              variant="primary"
+              icon={Route}
+              className="w-full"
+            >
+              今選んだ{selectedSpots.length}個でルート作成
+            </ActionButton>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

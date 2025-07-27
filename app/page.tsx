@@ -74,67 +74,67 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* メインメッセージ */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+      <main className="max-w-4xl mx-auto px-4 py-4 sm:py-8">
+        {/* メインメッセージ - モバイルでコンパクト */}
+        <div className="text-center mb-6 sm:mb-12">
+          <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
             どこに行きますか？
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-base sm:text-xl text-gray-600 mb-4 sm:mb-8">
             最初の目的地を選ぶと、おすすめスポットを提案します
           </p>
         </div>
 
-        {/* 3つのメインアクション */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        {/* 3つのメインアクション - モバイル最適化 */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-6 mb-4 sm:mb-12">
           {/* キーワード検索 */}
           <motion.div
             whileHover={{ scale: ANIMATIONS.SCALE_HOVER }}
-            className={`p-6 rounded-3xl border-2 cursor-pointer transition-all ${
+            className={`p-3 sm:p-6 rounded-xl sm:rounded-3xl border-2 cursor-pointer transition-all ${
               activeTab === 'search' 
                 ? 'border-orange-300 bg-orange-50' 
                 : 'border-gray-200 bg-white hover:border-orange-200'
             }`}
             onClick={() => setActiveTab('search')}
           >
-            <Search className="w-8 h-8 text-orange-600 mb-4" />
-            <h3 className="text-xl font-bold mb-2">キーワードで探す</h3>
-            <p className="text-gray-600 text-sm">温泉、絶景、グルメなど</p>
+            <Search className="w-5 h-5 sm:w-8 sm:h-8 text-orange-600 mb-1 sm:mb-4 mx-auto" />
+            <h3 className="text-xs sm:text-xl font-bold text-center">キーワード</h3>
+            <p className="text-gray-600 text-xs sm:text-sm hidden sm:block text-center mt-1 sm:mt-2">温泉、絶景、グルメなど</p>
           </motion.div>
 
           {/* 地図で選ぶ */}
           <motion.div
             whileHover={{ scale: ANIMATIONS.SCALE_HOVER }}
-            className={`p-6 rounded-3xl border-2 cursor-pointer transition-all ${
+            className={`p-3 sm:p-6 rounded-xl sm:rounded-3xl border-2 cursor-pointer transition-all ${
               activeTab === 'map' 
                 ? 'border-orange-300 bg-orange-50' 
                 : 'border-gray-200 bg-white hover:border-orange-200'
             }`}
             onClick={() => setActiveTab('map')}
           >
-            <Map className="w-8 h-8 text-orange-600 mb-4" />
-            <h3 className="text-xl font-bold mb-2">地図から選ぶ</h3>
-            <p className="text-gray-600 text-sm">位置を見ながら探す</p>
+            <Map className="w-5 h-5 sm:w-8 sm:h-8 text-orange-600 mb-1 sm:mb-4 mx-auto" />
+            <h3 className="text-xs sm:text-xl font-bold text-center">地図から選ぶ</h3>
+            <p className="text-gray-600 text-xs sm:text-sm hidden sm:block text-center mt-1 sm:mt-2">位置を見ながら探す</p>
           </motion.div>
 
           {/* 人気スポット */}
           <motion.div
             whileHover={{ scale: ANIMATIONS.SCALE_HOVER }}
-            className={`p-6 rounded-3xl border-2 cursor-pointer transition-all ${
+            className={`p-3 sm:p-6 rounded-xl sm:rounded-3xl border-2 cursor-pointer transition-all ${
               activeTab === 'trending' 
                 ? 'border-orange-300 bg-orange-50' 
                 : 'border-gray-200 bg-white hover:border-orange-200'
             }`}
             onClick={() => setActiveTab('trending')}
           >
-            <TrendingUp className="w-8 h-8 text-orange-600 mb-4" />
-            <h3 className="text-xl font-bold mb-2">人気スポット</h3>
-            <p className="text-gray-600 text-sm">今注目の場所</p>
+            <TrendingUp className="w-5 h-5 sm:w-8 sm:h-8 text-orange-600 mb-1 sm:mb-4 mx-auto" />
+            <h3 className="text-xs sm:text-xl font-bold text-center">人気スポット</h3>
+            <p className="text-gray-600 text-xs sm:text-sm hidden sm:block text-center mt-1 sm:mt-2">今注目の場所</p>
           </motion.div>
         </div>
 
         {/* コンテンツエリア */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-sm">
           {activeTab === 'search' && (
             <SearchTab
               onSpotSelect={handleDestinationSelect}

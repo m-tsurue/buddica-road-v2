@@ -13,24 +13,30 @@ interface MapboxMapProps {
   spots?: Spot[];
   selectedSpot?: Spot | null;
   onSpotSelect?: (spot: Spot) => void;
+  onSpotRemove?: (spot: Spot) => void;
   height?: string;
   className?: string;
+  showRoute?: boolean;
 }
 
 export function MapboxMap({ 
   spots = [], 
-  selectedSpot, 
+  selectedSpot,
+  onSpotSelect,
+  onSpotRemove,
   height = '400px',
-  className = '' 
+  className = '',
+  showRoute = false
 }: MapboxMapProps) {
-  const { mapContainer, map, isLoaded, error, addMarkers, clearMarkers, flyToSpot } = useMapbox();
+  const { mapContainer, map, isLoaded, error, addMarkers, clearMarkers, flyToSpot, drawRoute, clearRoute } = useMapbox();
 
   // スポットデータが変更された時にマーカーを更新
   useEffect(() => {
     if (isLoaded && spots.length > 0) {
-      addMarkers(spots);
+      addMarkers(spots, onSpotSelect, onSpotRemove);
     }
-  }, [isLoaded, spots, addMarkers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, spots, onSpotSelect, onSpotRemove]);
 
   // 選択されたスポットに移動
   useEffect(() => {
@@ -38,6 +44,15 @@ export function MapboxMap({
       flyToSpot(selectedSpot);
     }
   }, [selectedSpot, isLoaded, flyToSpot]);
+
+  // ルート描画
+  useEffect(() => {
+    if (isLoaded && showRoute && spots.length > 1) {
+      drawRoute(spots);
+    } else if (isLoaded && !showRoute) {
+      clearRoute();
+    }
+  }, [isLoaded, showRoute, spots, drawRoute, clearRoute]);
 
   // エラー表示
   if (error) {

@@ -14,9 +14,9 @@ export function MapTab({ onSpotSelect }: MapTabProps) {
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [filteredSpots, setFilteredSpots] = useState<Spot[]>(mockSpots);
 
-  // 地図でスポットを選択した時の処理
+  // 地図でスポットを選択した時の処理（ポップアップからの選択）
   const handleMapSpotSelect = (spot: Spot) => {
-    setSelectedSpot(spot);
+    onSpotSelect(spot);
   };
 
   // スポットを目的地として選択

@@ -1,12 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { storage } from '@/lib/utils';
 
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((val: T) => T)) => void, () => void] {
-  // State to store our value
-  const [storedValue, setStoredValue] = useState<T>(initialValue);
+  // State to store our value - initialize with a function to avoid re-running on every render
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      if (typeof window === 'undefined') {
+        return initialValue;
+      }
+      const item = storage.get(key, initialValue);
+      return item;
+    } catch (error) {
+      console.error(`Error reading localStorage key "${key}":`, error);
+      return initialValue;
+    }
+  });
 
   // Return a wrapped version of useState's setter function that persists the new value to localStorage
   const setValue = (value: T | ((val: T) => T)) => {
@@ -33,12 +44,6 @@ export function useLocalStorage<T>(
       console.error(`Error removing localStorage key "${key}":`, error);
     }
   };
-
-  // Get from local storage once on mount
-  useEffect(() => {
-    const item = storage.get(key, initialValue);
-    setStoredValue(item);
-  }, [key, initialValue]);
 
   return [storedValue, setValue, removeValue];
 }
