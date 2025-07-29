@@ -98,7 +98,7 @@ function SortableSpotItem({
 
 export default function RouteMapPage() {
   const router = useRouter()
-  const { selectedSpots, selectedCount, reorderSpots } = useSpotSelection()
+  const { selectedSpots, selectedCount, reorderSpots, removeSpot } = useSpotSelection()
   const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false)
   const [selectedSpotForModal, setSelectedSpotForModal] = useState<Spot | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -387,8 +387,7 @@ export default function RouteMapPage() {
           onClose={() => setSelectedSpotForModal(null)}
           isFromSelectedList={true}
           onRemoveSpot={(spotId) => {
-            // ここでスポットを削除する処理を実装可能
-            console.log('Remove spot:', spotId)
+            removeSpot(spotId)
             setSelectedSpotForModal(null)
           }}
         />
