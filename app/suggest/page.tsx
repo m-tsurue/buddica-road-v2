@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Car, Heart, Sparkles, Route, RotateCcw } from 'lucide-react'
@@ -12,7 +12,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ActionButton } from '@/components/ui/ActionButton'
 import { ANIMATIONS } from '@/lib/constants'
 
-export default function SuggestPage() {
+function SuggestPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const baseSpotId = searchParams?.get('baseSpot')
@@ -188,5 +188,13 @@ export default function SuggestPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function SuggestPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <SuggestPageContent />
+    </Suspense>
   )
 }
