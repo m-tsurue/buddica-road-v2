@@ -6,10 +6,10 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // 一時的に戻す - Phase 2で段階的修正
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // 一時的に戻す - Phase 2で段階的修正
   },
 };
 
