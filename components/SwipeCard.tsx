@@ -7,11 +7,12 @@ import { useState } from 'react';
 
 interface SwipeCardProps {
   spot: Spot;
-  onSwipe: (direction: 'left' | 'right') => void;
+  onSwipe: (spot: Spot, liked: boolean) => void;
   isTop: boolean;
+  hideActionButtons?: boolean;
 }
 
-export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
+export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = false }: SwipeCardProps) {
   const [imageIndex, setImageIndex] = useState(0);
   const controls = useAnimation();
   const x = useMotionValue(0);
@@ -37,7 +38,7 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
         transition: { duration: 0.3, ease: "easeOut" }
       });
       
-      onSwipe(direction);
+      onSwipe(spot, direction === 'right');
     } else {
       controls.start({ 
         x: 0, 
@@ -56,7 +57,7 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
 
   return (
     <motion.div
-      className={`absolute w-full h-full ${isTop ? 'z-30' : 'z-10'}`}
+      className={`w-full h-full ${isTop ? 'z-30' : 'z-10'} relative`}
       style={{ x, y, rotate }}
       drag={isTop}
       dragConstraints={{ left: -300, right: 300, top: -50, bottom: 50 }}
@@ -69,9 +70,9 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
       initial={{ scale: isTop ? 1 : 0.95, opacity: 1 }}
     >
       <div className={`w-full h-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl relative ${!isTop ? 'brightness-95' : ''}`}>
-        {/* 画像エリア - モバイルで高さを減らす */}
+        {/* 画像エリア - 高さを大きく */}
         <div 
-          className="relative h-[55%] sm:h-[60%] overflow-hidden cursor-pointer"
+          className="relative h-[70%] sm:h-[75%] overflow-hidden cursor-pointer"
           onClick={handleImageClick}
         >
           <img
@@ -125,7 +126,7 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
         </div>
         
         {/* 情報エリア - モバイルコンパクト化 */}
-        <div className="p-3 sm:p-6 space-y-2 sm:space-y-4">
+        <div className="px-3 sm:px-6 pt-6 pb-6 space-y-2 sm:space-y-4">
           {/* タイトルとレーティング */}
           <div className="flex items-start justify-between">
             <h2 className="text-lg sm:text-2xl font-bold text-gray-900 flex-1 mr-2">{spot.name}</h2>
@@ -167,24 +168,26 @@ export default function SwipeCard({ spot, onSwipe, isTop }: SwipeCardProps) {
         </div>
         
         {/* アクションボタン - モバイルサイズ縮小 */}
-        <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3 sm:gap-4">
-          <motion.button
-            onClick={() => onSwipe('left')}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-200"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <X className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
-          </motion.button>
-          <motion.button
-            onClick={() => onSwipe('right')}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-200"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
-          </motion.button>
-        </div>
+        {!hideActionButtons && (
+          <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3 sm:gap-4">
+            <motion.button
+              onClick={() => onSwipe(spot, false)}
+              className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-200"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+            </motion.button>
+            <motion.button
+              onClick={() => onSwipe(spot, true)}
+              className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-gray-200"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
+            </motion.button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -50,9 +50,31 @@ export interface SearchState {
   hasResults: boolean;
 }
 
+// スポット関連の型定義
+export interface Spot {
+  id: string;
+  name: string;
+  description: string;
+  images: string[];
+  location: {
+    lat: number;
+    lng: number;
+    address?: string;
+    distance?: string;
+  };
+  tags: string[];
+  bestTime: string;
+  duration: string;
+  rating: number;
+  reviews: number;
+  vibes: string[];
+  hours?: string;
+  parking?: string;
+}
+
 // ローカルストレージのデータ型
 export interface StorageData {
-  primaryDestination: import('@/lib/mock-data').Spot | null;
-  selectedSpots: import('@/lib/mock-data').Spot[];
+  primaryDestination: Spot | null;
+  selectedSpots: Spot[];
   currentIndex: number;
 }

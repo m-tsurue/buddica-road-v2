@@ -4,23 +4,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SwipeCard from '@/components/SwipeCard';
 import { Spot } from '@/lib/mock-data';
 import { Car, Heart, Sparkles, Route, RotateCcw } from 'lucide-react';
-import { useSpotSelection } from '@/hooks/useSpotSelection';
+import { useSpotSelectionContext } from '@/hooks/useSpotSelectionContext';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { ANIMATIONS } from '@/lib/constants';
 
 export default function SwipePage() {
   const {
-    primaryDestination,
     selectedSpots,
     currentIndex,
     recommendedSpots,
     isLoaded,
     hasMoreSpots,
+    swipeContext,
     handleSwipe,
     reset,
     proceedToRouteEditor
-  } = useSpotSelection();
+  } = useSpotSelectionContext();
 
 
 
@@ -73,18 +73,18 @@ export default function SwipePage() {
           {/* スワイプエリア */}
           <div className="flex-1">
             <div className="text-center mb-4 sm:mb-8">
-              {primaryDestination && (
-                <div className="mb-2 sm:mb-4">
-                  <p className="text-xs sm:text-sm text-orange-600 font-medium">
-                    📍 {primaryDestination.name} をベースにレコメンド
-                  </p>
-                </div>
-              )}
+              <div className="mb-2 sm:mb-4">
+                <p className="text-xs sm:text-sm text-orange-600 font-medium">
+                  📍 {swipeContext}
+                </p>
+              </div>
               <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
-                ドライブを彩るスポットを選ぼう
+                {selectedSpots.length > 0 ? 'さらにスポットを追加' : 'ドライブを彩るスポットを選ぼう'}
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
-                素敵な寄り道で旅をもっと特別にしませんか？
+                {selectedSpots.length > 0 
+                  ? `あと${10 - selectedSpots.length}個まで追加できます`
+                  : '素敵な寄り道で旅をもっと特別にしませんか？'}
               </p>
             </div>
 
@@ -194,7 +194,7 @@ export default function SwipePage() {
               icon={Route}
               className="w-full"
             >
-              今選んだ{selectedSpots.length}個でルート作成
+              ドライブルートを見る（{selectedSpots.length}スポット）
             </ActionButton>
           </div>
         </div>
