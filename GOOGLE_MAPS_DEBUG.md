@@ -1,11 +1,12 @@
 # Google Maps API 問題の解決手順
 
-## 現在の問題
-- Vercel本番環境で「This page can't load Google Maps correctly.」エラー
-- ローカル環境では動作している
-- API制限は `https://buddica-road-v2.vercel.app/*` で設定済み
+## 解決済み問題
+- **問題**: Vercel本番環境で「This page can't load Google Maps correctly.」エラー
+- **原因**: Vercel環境変数 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` が未設定
+- **解決**: Vercelダッシュボードで環境変数を設定し、再デプロイ実行
+- **確認**: https://buddica-road-v2.vercel.app/route-map で正常動作確認済み
 
-## 解決手順
+## 解決手順（参考）
 
 ### 1. Vercelの環境変数を確認・設定
 ```bash
@@ -19,6 +20,7 @@ vercel env add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 2. `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` を追加
 3. 値: `AIzaSyBNppw7cFG_r5mU6qON4tv_Iw2JdLbDbog`
 4. Production, Preview, Development 全てにチェック
+5. **重要**: 環境変数設定後は必ずデプロイメントの再実行が必要
 
 ### 2. Google Cloud Console でAPI制限を確認
 - Google Cloud Console → APIs & Services → Credentials
@@ -45,3 +47,15 @@ vercel env add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 2. **API制限エラー**: Google Cloud Consoleでリファラー設定を確認  
 3. **API無効エラー**: 必要なAPIが有効化されているか確認
 4. **課金エラー**: Google Cloudで課金アカウントが設定されているか確認
+
+## デバッグ方法
+- ブラウザ開発者ツールのConsoleタブで以下の情報を確認:
+  - `Google Maps API Key exists: true/false`
+  - `API Key length: 39` (正常な場合)
+- エラー詳細は地図読み込み失敗時に表示される「エラー詳細」を展開して確認
+
+## 現在の設定状況
+- **ローカル開発**: `.env.local`でAPIキー設定済み
+- **Vercel本番**: 環境変数設定済み、正常動作中
+- **API制限**: `https://buddica-road-v2.vercel.app/*` で設定済み
+- **有効API**: Maps JavaScript API, Places API, Directions API, Geocoding API

@@ -58,31 +58,34 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
   };
 
   return (
-    <motion.div
-      className={`w-full ${isTop ? 'z-30' : 'z-10'} relative`}
-      style={{ x, y, rotate }}
-      drag={isTop}
-      dragConstraints={{ left: -300, right: 300, top: -50, bottom: 50 }}
-      dragElastic={0.2}
-      dragMomentum={false}
-      onDragEnd={handleDragEnd}
-      animate={controls}
-      whileTap={{ scale: 0.98 }}
-      whileDrag={{ scale: 1.05 }}
-      initial={{ scale: isTop ? 1 : 0.95, opacity: 1 }}
-    >
-      <div 
-        className={`w-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl relative ${!isTop ? 'brightness-95' : ''} ${onCardClick ? 'cursor-pointer' : ''}`}
-        onClick={(e) => {
-          // Only handle click if not dragging and onCardClick is provided
-          if (onCardClick && !e.defaultPrevented) {
-            onCardClick(spot);
-          }
-        }}
+    <div className="relative w-full h-full">
+      <motion.div
+        className={`w-full ${isTop ? 'z-30' : 'z-10'} relative`}
+        style={{ x, y, rotate }}
+        drag={isTop}
+        dragConstraints={{ left: -300, right: 300, top: -50, bottom: 50 }}
+        dragElastic={0.2}
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        whileTap={{ scale: 0.98 }}
+        whileDrag={{ scale: 1.05 }}
+        initial={{ scale: isTop ? 1 : 0.95, opacity: 1 }}
       >
-        {/* 画像エリア - 高さを大きく */}
         <div 
-          className="relative h-64 overflow-hidden cursor-pointer"
+          className={`w-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl relative ${!isTop ? 'brightness-95' : ''} ${onCardClick ? 'cursor-pointer' : ''}`}
+          style={{ height: '380px' }}
+          onClick={(e) => {
+            // Only handle click if not dragging and onCardClick is provided
+            if (onCardClick && !e.defaultPrevented) {
+              onCardClick(spot);
+            }
+          }}
+        >
+        {/* 画像エリア - 70%の高さ */}
+        <div 
+          className="relative overflow-hidden cursor-pointer"
+          style={{ height: '70%' }}
           onClick={handleImageClick}
         >
           <img
@@ -108,19 +111,6 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
           {/* グラデーションオーバーレイ */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
           
-          {/* スワイプヒント - モバイル最適化 */}
-          <motion.div
-            className="absolute top-10 sm:top-20 right-4 sm:right-20 px-3 py-2 sm:px-4 sm:py-2 bg-green-500 text-white rounded-full font-bold text-sm sm:text-lg transform rotate-12"
-            style={{ opacity: likeOpacity }}
-          >
-            <Heart className="w-4 h-4 sm:w-6 sm:h-6 fill-current" />
-          </motion.div>
-          <motion.div
-            className="absolute top-10 sm:top-20 left-4 sm:left-20 px-3 py-2 sm:px-4 sm:py-2 bg-red-500 text-white rounded-full font-bold text-sm sm:text-lg transform -rotate-12"
-            style={{ opacity: nopeOpacity }}
-          >
-            <X className="w-4 h-4 sm:w-6 sm:h-6" />
-          </motion.div>
           
           {/* タグ - モバイルでサイズ縮小 */}
           <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 flex flex-wrap gap-1 sm:gap-2">
@@ -135,8 +125,8 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
           </div>
         </div>
         
-        {/* 情報エリア - 仕様固定 */}
-        <div className="px-4 sm:px-6 pt-4 pb-6 space-y-3">
+        {/* 情報エリア - コンパクト */}
+        <div className="px-4 sm:px-6 pt-3 pb-3 space-y-2">
           {/* タイトルとレーティング */}
           <div className="flex items-start justify-between">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex-1 mr-2">{spot.name}</h2>
@@ -151,8 +141,8 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
           
           {/* タップヒント */}
           {onCardClick && (
-            <div className="text-center pt-2">
-              <span className="text-sm text-purple-600 font-medium">タップして詳細を見る</span>
+            <div className="text-center pt-1">
+              <span className="text-xs text-purple-600 font-medium">タップして詳細を見る</span>
             </div>
           )}
         </div>
@@ -178,7 +168,40 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
             </motion.button>
           </div>
         )}
-      </div>
-    </motion.div>
+        </div>
+      </motion.div>
+      
+      {/* スワイプヒント - 固定位置オーバーレイ（カードの元の位置に固定） */}
+      {isTop && (
+        <>
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-pink-500/30 backdrop-blur-sm flex items-center justify-center pointer-events-none z-50"
+            style={{ opacity: likeOpacity }}
+          >
+            <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl border border-white/20 transform rotate-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <Heart className="w-5 h-5 text-white fill-current" />
+                </div>
+                <span className="text-lg font-bold text-gray-800">追加</span>
+              </div>
+            </div>
+          </motion.div>
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-gray-400/20 to-gray-500/30 backdrop-blur-sm flex items-center justify-center pointer-events-none z-50"
+            style={{ opacity: nopeOpacity }}
+          >
+            <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl border border-white/20 transform -rotate-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
+                  <X className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-bold text-gray-800">スキップ</span>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </div>
   );
 }

@@ -88,7 +88,7 @@ function SortableSpotItem({
         </div>
       </div>
       <div className="mt-2 text-center">
-        <span className="text-xs text-gray-600 truncate block">スポット{index + 1}</span>
+        <span className="text-xs text-gray-600 truncate block">{spot.name}</span>
       </div>
     </div>
   )
@@ -352,6 +352,19 @@ export default function RouteMapPage() {
                       )}
                     </div>
                   ))}
+                  
+                  {/* 立ち寄り先追加ボタン */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsAddSpotModalOpen(true)}
+                      className="aspect-square w-full bg-orange-100 border-2 border-dashed border-orange-300 rounded-lg hover:bg-orange-200 hover:border-orange-400 transition-colors flex flex-col items-center justify-center group"
+                    >
+                      <Plus className="w-6 h-6 text-orange-600 mb-1" />
+                      <span className="text-xs text-orange-700 font-medium text-center leading-tight">
+                        立ち寄り先<br/>追加
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </SortableContext>
               
@@ -372,7 +385,7 @@ export default function RouteMapPage() {
                     </div>
                     <div className="mt-2 text-center">
                       <span className="text-xs text-gray-600 truncate block">
-                        スポット{selectedSpots.findIndex(spot => spot.id === activeSpot.id) + 1}
+                        {activeSpot.name}
                       </span>
                     </div>
                   </div>
@@ -398,16 +411,6 @@ export default function RouteMapPage() {
               </div>
             </div>
             
-            {/* スポット追加ボタン */}
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => setIsAddSpotModalOpen(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-orange-300 hover:text-orange-600 hover:bg-orange-50 transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                立ち寄り先を追加
-              </button>
-            </div>
           </div>
 
         </div>

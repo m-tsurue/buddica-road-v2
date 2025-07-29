@@ -113,8 +113,13 @@ interface Location {
 
 ## 設定・環境
 - **Google Maps API Key**: `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
+  - ローカル開発: `.env.local`で設定
+  - Vercel本番: Environment Variablesで設定済み
+  - API制限: `https://buddica-road-v2.vercel.app/*`
+  - 有効API: Maps JavaScript API, Places API, Directions API, Geocoding API
 - **開発サーバー**: `npm run dev --turbopack`
 - **ポート**: デフォルト3000、競合時は3001使用
+- **本番URL**: https://buddica-road-v2.vercel.app/
 
 ---
 
@@ -201,5 +206,28 @@ interface Location {
 - **アクセシビリティ**: WCAG準拠
 - **SEO最適化**: メタデータとサイトマップ
 - **セキュリティ**: CSP、CORS設定
+
+---
+
+## 最近の対応履歴
+
+### Google Maps API設定問題の解決 (2024年)
+- **問題**: Vercel本番環境で「This page can't load Google Maps correctly.」エラー
+- **原因**: 環境変数 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` がVercelで未設定
+- **解決**: Vercel Dashboardで環境変数を設定し、再デプロイ実行
+- **確認**: https://buddica-road-v2.vercel.app/route-map で正常動作確認済み
+
+### UI/UX改善対応
+- 出発地・到着地ボックスの高さ調整（コンパクト化）
+- 地図の展開機能追加（288px ↔ 60vh）
+- シングルタッチでの地図ドラッグ対応
+- 削除機能の追加（出発地・到着地の右上にゴミ箱ボタン）
+- 検索機能の改善（位置設定モードとルート追加モードの分離）
+- ドラッグ&ドロップのUI改善（3列グリッド、説明テキスト）
+
+### コードベース管理
+- Git push先をorigin-v2に修正
+- 包括的な仕様書とデバッグガイドの作成
+- AI引き継ぎ用ドキュメントの整備
 
 この仕様書をベースに、次の開発者が効率的に開発を継続できます。

@@ -107,28 +107,10 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
           className="relative bg-white rounded-lg w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
         >
           {/* ヘッダー */}
-          <div className="flex-shrink-0 pt-4 px-4 pb-4 bg-gradient-to-br from-purple-50 to-pink-50">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                {/* リセットボタン */}
-                {currentIndex > 0 && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    whileHover={{ scale: ANIMATIONS.SCALE_HOVER }}
-                    whileTap={{ scale: ANIMATIONS.SCALE_TAP }}
-                    onClick={reset}
-                    className="p-2 bg-white hover:bg-gray-50 rounded-full transition-colors shadow-sm"
-                    title="最初からやり直す"
-                  >
-                    <RotateCcw className="w-4 h-4 text-gray-600" />
-                  </motion.button>
-                )}
-              </div>
-            </div>
+          <div className="flex-shrink-0 bg-gradient-to-br from-purple-50 to-pink-50" style={{ paddingTop: '12px' }}>
 
             <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="flex items-center justify-center gap-3 mb-3">
                 <motion.div
                   animate={{ 
                     opacity: [0.5, 1, 0.5],
@@ -142,23 +124,20 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
                 >
                   <Sparkles className="w-6 h-6 text-purple-500" />
                 </motion.div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900">
                   寄り道提案
                 </h1>
-              </div>
-              <p className="text-base text-gray-700 mb-2">
-                現在のルートに合わせて最適なスポットをご提案
-              </p>
-              <div className="inline-flex items-center gap-2 bg-purple-100 px-3 py-1 rounded-full">
-                <span className="text-sm font-semibold text-purple-700">
-                  {hasMoreSpots ? `${recommendedSpots.length - currentIndex}/${recommendedSpots.length}件` : '完了！'}
-                </span>
+                <div className="inline-flex items-center gap-2 bg-purple-100 px-3 py-1 rounded-full">
+                  <span className="text-sm font-semibold text-purple-700">
+                    {hasMoreSpots ? `${recommendedSpots.length - currentIndex}/${recommendedSpots.length}件` : '完了！'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* スワイプエリア */}
-          <div className="flex-1 relative px-4 pt-6 pb-4 min-h-[500px]">
+          <div className="flex-1 relative px-4 pb-4" style={{ paddingTop: '16px' }}>
             
             {!isLoaded ? (
               <div className="flex items-center justify-center h-full">
@@ -169,13 +148,20 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
               </div>
             ) : hasMoreSpots ? (
               <div className="relative w-full h-full">
-                <div className="relative w-full" style={{ height: '420px' }}>
+                {/* スワイプインストラクション - 控えめに */}
+                <div className="flex justify-center mb-3">
+                  <span className="text-sm text-gray-500">
+                    ← スワイプして選択 →
+                  </span>
+                </div>
+                
+                <div className="relative w-full" style={{ height: '380px' }}>
                   <AnimatePresence>
                     {recommendedSpots.slice(currentIndex, currentIndex + 3).map((spot, index) => (
                       <div 
                         key={`${spot.id}-${currentIndex + index}`}
-                        className="absolute top-0 left-0 w-full h-full"
-                        style={{ zIndex: 10 - index }}
+                        className="absolute top-0 left-0 w-full"
+                        style={{ zIndex: 10 - index, height: '380px' }}
                       >
                         <SwipeCard
                           spot={spot}
@@ -187,13 +173,6 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
                       </div>
                     ))}
                   </AnimatePresence>
-                </div>
-                
-                {/* スワイプインストラクション - カードの下に移動 */}
-                <div className="flex justify-center mt-4">
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-                    ← スワイプして選択 →
-                  </div>
                 </div>
               </div>
             ) : (
@@ -219,26 +198,30 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
 
           {/* アクションボタン - モーダル下部に独立配置 */}
           {hasMoreSpots && (
-            <div className="flex-shrink-0 px-4 py-4">
-              <div className="flex justify-center gap-6">
-                <motion.button
-                  onClick={() => recommendedSpots[currentIndex] && handleSwipe(recommendedSpots[currentIndex], false)}
-                  className="w-20 h-20 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full shadow-2xl flex items-center justify-center border-4 border-white hover:from-gray-500 hover:to-gray-600"
-                  whileHover={{ scale: 1.15 }}
-                  whileTap={{ scale: 0.95 }}
-                  title="スキップ"
-                >
-                  <X className="w-8 h-8 text-white" />
-                </motion.button>
-                <motion.button
-                  onClick={() => recommendedSpots[currentIndex] && handleSwipe(recommendedSpots[currentIndex], true)}
-                  className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-2xl flex items-center justify-center border-4 border-white hover:from-purple-600 hover:to-pink-600"
-                  whileHover={{ scale: 1.15 }}
-                  whileTap={{ scale: 0.95 }}
-                  title="ルートに追加"
-                >
-                  <Heart className="w-8 h-8 text-white fill-current" />
-                </motion.button>
+            <div className="flex-shrink-0 px-4 pb-3 pt-4">
+              <div className="flex justify-center gap-8">
+                <div className="flex flex-col items-center">
+                  <motion.button
+                    onClick={() => recommendedSpots[currentIndex] && handleSwipe(recommendedSpots[currentIndex], false)}
+                    className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full shadow-2xl flex items-center justify-center border-4 border-white hover:from-gray-500 hover:to-gray-600"
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <X className="w-6 h-6 text-white" />
+                  </motion.button>
+                  <span className="text-xs text-gray-600 mt-1">スキップ</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <motion.button
+                    onClick={() => recommendedSpots[currentIndex] && handleSwipe(recommendedSpots[currentIndex], true)}
+                    className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-2xl flex items-center justify-center border-4 border-white hover:from-purple-600 hover:to-pink-600"
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Heart className="w-6 h-6 text-white fill-current" />
+                  </motion.button>
+                  <span className="text-xs text-gray-600 mt-1">追加</span>
+                </div>
               </div>
             </div>
           )}
