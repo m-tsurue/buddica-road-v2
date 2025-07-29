@@ -23,7 +23,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ArrowLeft, MapPin, Clock, Navigation, Sparkles, Wand2, GripVertical, Search } from 'lucide-react'
+import { ArrowLeft, MapPin, Clock, Navigation, Sparkles, Star, GripVertical, Plus, Search } from 'lucide-react'
 import { useSpotSelection } from '@/contexts/SpotSelectionContext'
 import { Spot } from '@/lib/mock-data'
 import SuggestModal from '@/components/SuggestModal'
@@ -78,8 +78,9 @@ function SortableSpotItem({
           
           {/* ドラッグハンドル */}
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="bg-white/90 rounded-full p-1">
-              <GripVertical className="w-3 h-3 text-gray-700" />
+            <div className="bg-white/95 rounded-lg p-2 shadow-sm flex flex-col items-center">
+              <GripVertical className="w-4 h-4 text-gray-600" />
+              <span className="text-xs text-gray-600 mt-1">ドラッグ</span>
             </div>
           </div>
         </div>
@@ -178,18 +179,30 @@ export default function RouteMapPage() {
             </button>
             <h1 className="text-lg font-bold flex-1 text-center">ドライブルート</h1>
             <button
-              onClick={() => router.push('/search')}
-              className="flex items-center justify-center w-20 h-10 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              title="スポットを検索"
+              onClick={() => setIsSuggestModalOpen(true)}
+              className="flex items-center justify-center w-20 h-10 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+              title="寄り道提案"
             >
-              <Search className="w-5 h-5" />
+              <motion.div
+                animate={{ 
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatDelay: 2
+                }}
+              >
+                <Star className="w-5 h-5 fill-current" />
+              </motion.div>
             </button>
           </div>
         </div>
       </header>
 
       {/* 地図エリア */}
-      <div className="relative h-96 bg-gray-200">
+      <div className="relative h-72 bg-gray-200">
         {/* 実際の地図実装時はMapbox等を使用 */}
         <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
           <div className="text-center text-gray-500">
@@ -219,9 +232,42 @@ export default function RouteMapPage() {
         </div>
       </div>
 
+      {/* 統計情報 */}
+      <div className="bg-white border-t border-gray-100 py-4">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex items-center justify-center gap-8">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-gray-500" />
+              <span className="text-sm text-gray-600">総距離</span>
+              <span className="font-bold text-gray-900">{totalDistance}km</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-gray-500" />
+              <span className="text-sm text-gray-600">予想時間</span>
+              <span className="font-bold text-gray-900">
+                {hours}:{minutes.toString().padStart(2, '0')}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ルート詳細 */}
       <div className="bg-white p-6">
         <div className="max-w-4xl mx-auto">
+          {/* 見出し */}
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-bold text-gray-900">訪問順序</h2>
+            <span className="text-sm text-gray-500">{selectedCount}スポット</span>
+          </div>
+          {selectedSpots.length > 1 && (
+            <p className="text-sm text-gray-400 mb-4 flex items-center gap-1">
+              <GripVertical className="w-3 h-3" />
+              ドラッグして順序を変更できます
+            </p>
+          )}
+          
           {/* ルートフロー */}
           <div className="mb-6">
             <DndContext 
@@ -285,75 +331,23 @@ export default function RouteMapPage() {
                 ) : null}
               </DragOverlay>
             </DndContext>
-          </div>
-
-          {/* 統計情報 */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-center gap-8 mb-4">
-              <div className="text-center">
-                <div className="flex items-center gap-1 text-gray-600 mb-1">
-                  <MapPin className="w-4 h-4" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{totalDistance}km</div>
-              </div>
-              
-              <div className="text-center">
-                <div className="flex items-center gap-1 text-gray-600 mb-1">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm">予想運転時間</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {hours}:{minutes.toString().padStart(2, '0')}
-                </div>
-              </div>
+            
+            {/* スポット追加ボタン */}
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => router.push('/search')}
+                className="inline-flex items-center gap-2 px-6 py-3 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-orange-300 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                <Search className="w-4 h-4" />
+                立ち寄り先を追加
+              </button>
             </div>
-
           </div>
+
         </div>
       </div>
 
-      {/* AI提案フローティングボタン */}
-      <motion.div
-        className="fixed bottom-24 right-6 z-40"
-        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 25 }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsSuggestModalOpen(true)}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 font-medium"
-        >
-          <motion.div
-            animate={{ 
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{ 
-              duration: 2,
-              repeat: Infinity,
-              repeatDelay: 3
-            }}
-          >
-            <Wand2 className="w-5 h-5" />
-          </motion.div>
-          <span className="text-sm">立ち寄りスポット提案</span>
-          <motion.div
-            animate={{ 
-              opacity: [0.5, 1, 0.5],
-              scale: [1, 1.2, 1]
-            }}
-            transition={{ 
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <Sparkles className="w-4 h-4" />
-          </motion.div>
-        </motion.button>
-      </motion.div>
 
       {/* 固定CTAボタン */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
