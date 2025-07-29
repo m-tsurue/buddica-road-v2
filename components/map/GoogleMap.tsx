@@ -77,6 +77,16 @@ export function GoogleMap({
     libraries: GOOGLE_MAPS_LIBRARIES
   });
 
+  // デバッグ用: APIキーの存在確認
+  useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    console.log('Google Maps API Key exists:', !!apiKey);
+    console.log('API Key length:', apiKey?.length);
+    if (loadError) {
+      console.error('Google Maps Load Error:', loadError);
+    }
+  }, [loadError]);
+
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
@@ -179,7 +189,16 @@ export function GoogleMap({
         <div className="text-center text-gray-600 max-w-md p-6">
           <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-red-500" />
           <p className="font-medium mb-2">地図の読み込みに失敗しました</p>
-          <p className="text-sm mb-3">Google Maps APIキーが設定されていません</p>
+          <p className="text-sm mb-3">
+            {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY 
+              ? 'Google Maps APIの設定に問題があります' 
+              : 'Google Maps APIキーが設定されていません'
+            }
+          </p>
+          <details className="text-xs text-left bg-red-50 p-2 rounded mt-2">
+            <summary className="cursor-pointer">エラー詳細</summary>
+            <pre className="mt-2 whitespace-pre-wrap">{JSON.stringify(loadError, null, 2)}</pre>
+          </details>
         </div>
       </div>
     );
