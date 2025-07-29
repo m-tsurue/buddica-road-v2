@@ -103,7 +103,7 @@ export function MapboxMap({
 
   return (
     <div 
-      className={`relative bg-gray-100 rounded-xl overflow-hidden ${className}`}
+      className={`relative bg-gray-100 overflow-hidden ${className}`}
       style={{ height }}
     >
       <div

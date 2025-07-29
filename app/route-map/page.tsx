@@ -28,6 +28,7 @@ import { useSpotSelection } from '@/contexts/SpotSelectionContext'
 import { Spot } from '@/lib/mock-data'
 import SuggestModal from '@/components/SuggestModal'
 import SpotDetailModal from '@/components/SpotDetailModal'
+import { MapboxMap } from '@/components/map/MapboxMap'
 
 // ソート可能なスポットアイテムコンポーネント
 function SortableSpotItem({ 
@@ -203,53 +204,38 @@ export default function RouteMapPage() {
         </div>
       </header>
 
-      {/* 地図エリア */}
-      <div className="relative h-72 bg-gray-200">
-        {/* 実際の地図実装時はMapbox等を使用 */}
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-          <div className="text-center text-gray-500">
-            <MapPin className="w-16 h-16 mx-auto mb-4" />
-            <p className="text-lg font-medium">ルート地図</p>
-            <p className="text-sm">実装予定</p>
-          </div>
-        </div>
-        
-        {/* 地図上のルート情報オーバーレイ（実際の実装では地図ライブラリが描画） */}
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3">
-          <div className="flex items-center gap-2 text-sm">
-            <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-              1
-            </div>
-            <span>出発地点</span>
-          </div>
-        </div>
-        
-        <div className="absolute top-16 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3">
-          <div className="flex items-center gap-2 text-sm">
-            <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-              {selectedCount}
-            </div>
-            <span>最終目的地</span>
-          </div>
-        </div>
+      {/* 地図エリア - 完全独立 */}
+      <div className="relative">
+        <MapboxMap 
+          spots={selectedSpots}
+          height="288px"
+          showRoute={true}
+          className=""
+        />
       </div>
 
-      {/* 統計情報 */}
-      <div className="bg-white border-t border-gray-100 py-4">
+      {/* 統計情報 - コンパクト版 */}
+      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-y border-orange-100 py-3">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-center gap-8">
+            {/* 距離 */}
             <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">総距離</span>
-              <span className="font-bold text-gray-900">{totalDistance}km</span>
+              <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-amber-400 rounded-full flex items-center justify-center">
+                <MapPin className="w-3 h-3 text-white" />
+              </div>
+              <span className="text-lg font-bold text-gray-800">{totalDistance}km</span>
+              <span className="text-xs text-orange-600 font-medium">の冒険</span>
             </div>
             
+            {/* 時間 */}
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">予想時間</span>
-              <span className="font-bold text-gray-900">
+              <div className="w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                <Clock className="w-3 h-3 text-white" />
+              </div>
+              <span className="text-lg font-bold text-gray-800">
                 {hours}:{minutes.toString().padStart(2, '0')}
               </span>
+              <span className="text-xs text-purple-600 font-medium">の旅</span>
             </div>
           </div>
         </div>
@@ -260,7 +246,7 @@ export default function RouteMapPage() {
         <div className="max-w-4xl mx-auto">
           {/* 見出し */}
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-bold text-gray-900">訪問順序</h2>
+            <h2 className="text-xl font-bold text-gray-900">🗺️ 冒険ルート</h2>
             <span className="text-sm text-gray-500">{selectedCount}スポット</span>
           </div>
           {selectedSpots.length > 1 && (
@@ -376,18 +362,16 @@ export default function RouteMapPage() {
       />
 
       {/* スポット詳細モーダル */}
-      {selectedSpotForModal && (
-        <SpotDetailModal
-          spot={selectedSpotForModal}
-          isOpen={!!selectedSpotForModal}
-          onClose={() => setSelectedSpotForModal(null)}
-          isFromSelectedList={true}
-          onRemoveSpot={(spotId) => {
-            removeSpot(spotId)
-            setSelectedSpotForModal(null)
-          }}
-        />
-      )}
+      <SpotDetailModal
+        spot={selectedSpotForModal}
+        isOpen={!!selectedSpotForModal}
+        onClose={() => setSelectedSpotForModal(null)}
+        isFromSelectedList={true}
+        onRemoveSpot={(spotId) => {
+          removeSpot(spotId)
+          setSelectedSpotForModal(null)
+        }}
+      />
     </div>
   )
 }

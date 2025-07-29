@@ -45,6 +45,26 @@ body.modal-open {
   height: 100% !important;
 }
 
+/* 完全リセット - Mapbox要素の位置を強制的に修正 */
+.mapboxgl-map {
+  position: relative !important;
+  left: -16px !important;
+  top: -16px !important;
+  width: calc(100% + 32px) !important;
+  height: calc(100% + 32px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}
+
+.mapboxgl-ctrl-top-right {
+  top: 26px !important;
+  right: 26px !important;
+}
+
 /* Mapbox ポップアップのスタイル調整 */
 .mapboxgl-popup {
   z-index: 1000 !important;

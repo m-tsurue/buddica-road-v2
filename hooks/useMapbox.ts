@@ -67,8 +67,12 @@ export function useMapbox(): MapboxHookReturn {
         touchZoomRotate: mapboxConfig.touchZoomRotate,
       });
 
-      // ナビゲーションコントロール追加（左端に配置）
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-left');
+      // ナビゲーションコントロール追加（デフォルト位置で余白確保）
+      map.current.addControl(new mapboxgl.NavigationControl({
+        showCompass: false,
+        showZoom: true,
+        visualizePitch: false
+      }), 'top-right');
 
       // 地図ロード完了イベント
       map.current.on('load', () => {

@@ -10,9 +10,10 @@ interface SwipeCardProps {
   onSwipe: (spot: Spot, liked: boolean) => void;
   isTop: boolean;
   hideActionButtons?: boolean;
+  onCardClick?: (spot: Spot) => void;
 }
 
-export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = false }: SwipeCardProps) {
+export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = false, onCardClick }: SwipeCardProps) {
   const [imageIndex, setImageIndex] = useState(0);
   const controls = useAnimation();
   const x = useMotionValue(0);
@@ -49,7 +50,8 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
     }
   };
 
-  const handleImageClick = () => {
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when cycling images
     if (spot.images.length > 1) {
       setImageIndex((prev) => (prev + 1) % spot.images.length);
     }
@@ -57,7 +59,7 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
 
   return (
     <motion.div
-      className={`w-full h-full ${isTop ? 'z-30' : 'z-10'} relative`}
+      className={`w-full ${isTop ? 'z-30' : 'z-10'} relative`}
       style={{ x, y, rotate }}
       drag={isTop}
       dragConstraints={{ left: -300, right: 300, top: -50, bottom: 50 }}
@@ -69,10 +71,18 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
       whileDrag={{ scale: 1.05 }}
       initial={{ scale: isTop ? 1 : 0.95, opacity: 1 }}
     >
-      <div className={`w-full h-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl relative ${!isTop ? 'brightness-95' : ''}`}>
+      <div 
+        className={`w-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl relative ${!isTop ? 'brightness-95' : ''} ${onCardClick ? 'cursor-pointer' : ''}`}
+        onClick={(e) => {
+          // Only handle click if not dragging and onCardClick is provided
+          if (onCardClick && !e.defaultPrevented) {
+            onCardClick(spot);
+          }
+        }}
+      >
         {/* 画像エリア - 高さを大きく */}
         <div 
-          className="relative h-[70%] sm:h-[75%] overflow-hidden cursor-pointer"
+          className="relative h-64 overflow-hidden cursor-pointer"
           onClick={handleImageClick}
         >
           <img
@@ -125,46 +135,26 @@ export default function SwipeCard({ spot, onSwipe, isTop, hideActionButtons = fa
           </div>
         </div>
         
-        {/* 情報エリア - モバイルコンパクト化 */}
-        <div className="px-3 sm:px-6 pt-6 pb-6 space-y-2 sm:space-y-4">
+        {/* 情報エリア - 仕様固定 */}
+        <div className="px-4 sm:px-6 pt-4 pb-6 space-y-3">
           {/* タイトルとレーティング */}
           <div className="flex items-start justify-between">
-            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 flex-1 mr-2">{spot.name}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex-1 mr-2">{spot.name}</h2>
             <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0">
-              <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs sm:text-sm font-medium">{spot.rating}</span>
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm font-medium">{spot.rating}</span>
             </div>
           </div>
           
-          {/* 説明 - モバイルで短縮 */}
-          <p className="text-gray-600 text-xs sm:text-sm line-clamp-1 sm:line-clamp-2">{spot.description}</p>
+          {/* 説明文 - 最大3行 */}
+          <p className="text-gray-600 text-sm sm:text-base line-clamp-3 leading-relaxed">{spot.description}</p>
           
-          {/* アイコン情報 */}
-          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500">
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span>{spot.duration}</span>
+          {/* タップヒント */}
+          {onCardClick && (
+            <div className="text-center pt-2">
+              <span className="text-sm text-purple-600 font-medium">タップして詳細を見る</span>
             </div>
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span>{spot.bestTime}</span>
-            </div>
-          </div>
-          
-          {/* Vibesタグ - モバイルで数を制限 */}
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
-            <div className="flex gap-1 sm:gap-2 flex-wrap">
-              {spot.vibes.slice(0, 2).map((vibe) => (
-                <span
-                  key={vibe}
-                  className="text-xs px-2 py-1 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 rounded-full font-medium"
-                >
-                  {vibe}
-                </span>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
         
         {/* アクションボタン - モバイルサイズ縮小 */}

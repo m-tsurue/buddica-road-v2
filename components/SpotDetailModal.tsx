@@ -5,6 +5,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { X, MapPin, Star, Clock, Car, Plus, Check } from 'lucide-react'
 import { mockSpots, Spot } from '@/lib/mock-data'
 import { useSpotSelection } from '@/contexts/SpotSelectionContext'
+import { MapboxMap } from '@/components/map/MapboxMap'
 
 interface SpotDetailModalProps {
   spotId?: string | null
@@ -69,11 +70,9 @@ export default function SpotDetailModal({ spotId, spot: providedSpot, isOpen, on
     }
   }, [isOpen, onClose])
 
-  if (!spot) return null
+  const selected = spot ? isSelected(spot.id) : false
 
-  const selected = isSelected(spot.id)
-
-  const handleToggleSpot = () => {
+  const handleToggleSpot = async () => {
     if (showSuccess) return // 既に処理中の場合は無効化
 
     const wasSelected = selected
@@ -84,11 +83,9 @@ export default function SpotDetailModal({ spotId, spot: providedSpot, isOpen, on
       setShowSuccess(true)
       toggleSpot(spot)
       
-      // 0.8秒後に閉じる
+      // 成功メッセージを少し表示してから閉じる
       setTimeout(() => {
-        if (modalRef.current) {
-          onClose()
-        }
+        onClose()
       }, 800)
     } else if (!wasSelected) {
       // 追加する場合
@@ -98,22 +95,18 @@ export default function SpotDetailModal({ spotId, spot: providedSpot, isOpen, on
       
       // 1秒後に閉じる
       setTimeout(() => {
-        if (modalRef.current) {
-          onClose()
-        }
-      }, 1000)
+        onClose()
+      }, 800)
     } else {
       // 削除する場合
       setSuccessAction('remove')
       setShowSuccess(true)
       toggleSpot(spot)
       
-      // 0.8秒後に閉じる
+      // 0.5秒後に閉じる
       setTimeout(() => {
-        if (modalRef.current) {
-          onClose()
-        }
-      }, 800)
+        onClose()
+      }, 400)
     }
   }
 
@@ -136,25 +129,30 @@ export default function SpotDetailModal({ spotId, spot: providedSpot, isOpen, on
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && spot && (
         <>
-          {/* バックドロップ */}
           <motion.div
+            key="modal-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 bg-black/50 z-40"
             onClick={handleBackdropClick}
             style={{ touchAction: 'none' }}
           />
           
-          {/* モーダル */}
           <motion.div
+            key="modal-content"
             ref={modalRef}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            transition={{ 
+              type: 'tween',
+              ease: [0.4, 0.0, 0.2, 1],
+              duration: 0.5
+            }}
             className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 max-h-[85vh] flex flex-col"
             style={{ touchAction: 'auto' }}
             drag="y"
@@ -224,6 +222,30 @@ export default function SpotDetailModal({ spotId, spot: providedSpot, isOpen, on
 
                 {/* 詳細情報 */}
                 <div className="space-y-6">
+                  {/* 住所セクション */}
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-orange-500" />
+                      住所・アクセス
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="text-sm text-gray-700">
+                        <span className="font-medium">住所：</span>
+                        {spot.address}
+                      </div>
+                      
+                      {/* 地図 */}
+                      <div className="rounded-lg overflow-hidden">
+                        <MapboxMap 
+                          spots={[spot]}
+                          height="200px"
+                          showRoute={false}
+                          className="rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4" />

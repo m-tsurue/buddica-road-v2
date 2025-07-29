@@ -7,6 +7,7 @@ export interface Spot {
     lat: number;
     lng: number;
   };
+  address: string;
   tags: string[];
   bestTime: string;
   duration: string;
@@ -25,6 +26,7 @@ export const mockSpots: Spot[] = [
       'https://images.unsplash.com/photo-1590077428593-a55bb07c4665?w=800&h=600&fit=crop'
     ],
     location: { lat: 35.2999, lng: 139.4813 },
+    address: '神奈川県藤沢市江の島2-3-28',
     tags: ['絶景', '夕日', 'デート'],
     bestTime: '夕方（16:00-18:00）',
     duration: '1時間',
@@ -41,6 +43,7 @@ export const mockSpots: Spot[] = [
       'https://images.unsplash.com/photo-1574290533993-10400ecac3c1?w=800&h=600&fit=crop'
     ],
     location: { lat: 35.3169, lng: 139.5358 },
+    address: '神奈川県鎌倉市長谷4-2-28',
     tags: ['歴史', '文化', '家族向け'],
     bestTime: '午前中（9:00-11:00）',
     duration: '30分',
@@ -57,6 +60,7 @@ export const mockSpots: Spot[] = [
       'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=800&h=600&fit=crop'
     ],
     location: { lat: 35.2444, lng: 139.0502 },
+    address: '神奈川県足柄下郡箱根町二ノ平1121',
     tags: ['アート', '散策', '写真映え'],
     bestTime: '午後（13:00-16:00）',
     duration: '2時間',
@@ -73,6 +77,7 @@ export const mockSpots: Spot[] = [
       'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop'
     ],
     location: { lat: 35.5103, lng: 138.7741 },
+    address: '山梨県南都留郡富士河口湖町河口3077-20',
     tags: ['テーマパーク', '音楽', '富士山'],
     bestTime: '日中（11:00-15:00）',
     duration: '1.5時間',

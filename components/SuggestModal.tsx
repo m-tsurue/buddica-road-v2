@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Heart, Sparkles, RotateCcw } from 'lucide-react'
 import SwipeCard from '@/components/SwipeCard'
+import SpotDetailModal from '@/components/SpotDetailModal'
 import { mockSpots, Spot } from '@/lib/mock-data'
 import { generateRecommendations } from '@/lib/recommendation'
 import { useSpotSelection } from '@/contexts/SpotSelectionContext'
@@ -20,6 +21,7 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
   const [recommendedSpots, setRecommendedSpots] = useState<Spot[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [selectedSpotForDetail, setSelectedSpotForDetail] = useState<Spot | null>(null)
   
   const { selectedSpots, addSpot, selectedCount } = useSpotSelection()
 
@@ -102,10 +104,10 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative bg-white rounded-3xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
+          className="relative bg-white rounded-lg w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
         >
           {/* ヘッダー */}
-          <div className="flex-shrink-0 p-6 pb-4 bg-gradient-to-br from-orange-50 to-amber-50">
+          <div className="flex-shrink-0 pt-4 px-4 pb-4 bg-gradient-to-br from-purple-50 to-pink-50">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 {/* リセットボタン */}
@@ -126,20 +128,37 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
             </div>
 
             <div className="text-center">
-              <p className="text-base text-black font-medium mb-2">
-                🤖 追加で立ち寄れるスポット
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <motion.div
+                  animate={{ 
+                    opacity: [0.5, 1, 0.5],
+                    scale: [1, 1.2, 1]
+                  }}
+                  transition={{ 
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <Sparkles className="w-6 h-6 text-purple-500" />
+                </motion.div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  寄り道提案
+                </h1>
+              </div>
+              <p className="text-base text-gray-700 mb-2">
                 現在のルートに合わせて最適なスポットをご提案
               </p>
-              <h2 className="text-xs font-medium text-gray-900">
-                {hasMoreSpots ? `${recommendedSpots.length - currentIndex}/${recommendedSpots.length}件` : '完了！'}
-              </h2>
+              <div className="inline-flex items-center gap-2 bg-purple-100 px-3 py-1 rounded-full">
+                <span className="text-sm font-semibold text-purple-700">
+                  {hasMoreSpots ? `${recommendedSpots.length - currentIndex}/${recommendedSpots.length}件` : '完了！'}
+                </span>
+              </div>
             </div>
           </div>
 
           {/* スワイプエリア */}
-          <div className="flex-1 relative p-6 min-h-[500px]">
+          <div className="flex-1 relative px-4 pt-6 pb-4 min-h-[500px]">
             
             {!isLoaded ? (
               <div className="flex items-center justify-center h-full">
@@ -150,7 +169,7 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
               </div>
             ) : hasMoreSpots ? (
               <div className="relative w-full h-full">
-                <div className="relative w-full" style={{ height: '350px' }}>
+                <div className="relative w-full" style={{ height: '420px' }}>
                   <AnimatePresence>
                     {recommendedSpots.slice(currentIndex, currentIndex + 3).map((spot, index) => (
                       <div 
@@ -163,10 +182,18 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
                           onSwipe={handleSwipe}
                           isTop={index === 0}
                           hideActionButtons={true}
+                          onCardClick={setSelectedSpotForDetail}
                         />
                       </div>
                     ))}
                   </AnimatePresence>
+                </div>
+                
+                {/* スワイプインストラクション - カードの下に移動 */}
+                <div className="flex justify-center mt-4">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                    ← スワイプして選択 →
+                  </div>
                 </div>
               </div>
             ) : (
@@ -175,14 +202,14 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center h-full text-center"
               >
-                <Sparkles className="w-16 h-16 text-orange-500 mb-4" />
+                <Sparkles className="w-16 h-16 text-purple-500 mb-4" />
                 <h3 className="text-xl font-bold mb-2">全てチェック完了！</h3>
                 <p className="text-gray-600 mb-6">
                   {selectedCount}個のスポットを選びました
                 </p>
                 <button
                   onClick={onClose}
-                  className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-colors"
                 >
                   ルートに戻る
                 </button>
@@ -192,11 +219,11 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
 
           {/* アクションボタン - モーダル下部に独立配置 */}
           {hasMoreSpots && (
-            <div className="flex-shrink-0 p-6 pt-0">
+            <div className="flex-shrink-0 px-4 py-4">
               <div className="flex justify-center gap-6">
                 <motion.button
                   onClick={() => recommendedSpots[currentIndex] && handleSwipe(recommendedSpots[currentIndex], false)}
-                  className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-2xl flex items-center justify-center border-4 border-white hover:from-red-600 hover:to-red-700"
+                  className="w-20 h-20 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full shadow-2xl flex items-center justify-center border-4 border-white hover:from-gray-500 hover:to-gray-600"
                   whileHover={{ scale: 1.15 }}
                   whileTap={{ scale: 0.95 }}
                   title="スキップ"
@@ -205,7 +232,7 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
                 </motion.button>
                 <motion.button
                   onClick={() => recommendedSpots[currentIndex] && handleSwipe(recommendedSpots[currentIndex], true)}
-                  className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-2xl flex items-center justify-center border-4 border-white hover:from-green-600 hover:to-green-700"
+                  className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-2xl flex items-center justify-center border-4 border-white hover:from-purple-600 hover:to-pink-600"
                   whileHover={{ scale: 1.15 }}
                   whileTap={{ scale: 0.95 }}
                   title="ルートに追加"
@@ -216,6 +243,15 @@ export default function SuggestModal({ isOpen, onClose, baseSpotId }: SuggestMod
             </div>
           )}
         </motion.div>
+        
+        {/* スポット詳細モーダル */}
+        {selectedSpotForDetail && (
+          <SpotDetailModal
+            spot={selectedSpotForDetail}
+            isOpen={!!selectedSpotForDetail}
+            onClose={() => setSelectedSpotForDetail(null)}
+          />
+        )}
       </div>
     </AnimatePresence>
   )
