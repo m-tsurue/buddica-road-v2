@@ -54,7 +54,8 @@ export function useMapbox(): MapboxHookReturn {
         minZoom: mapboxConfig.minZoom,
         pitch: mapboxConfig.pitch,
         bearing: mapboxConfig.bearing,
-        attributionControl: mapboxConfig.attributionControl,
+        attributionControl: false,
+        logoPosition: 'top-left', // ロゴ位置を指定してからCSSで非表示
         antialias: mapboxConfig.antialias,
         preserveDrawingBuffer: mapboxConfig.preserveDrawingBuffer,
         interactive: mapboxConfig.interactive,
@@ -67,12 +68,13 @@ export function useMapbox(): MapboxHookReturn {
         touchZoomRotate: mapboxConfig.touchZoomRotate,
       });
 
-      // ナビゲーションコントロール追加（デフォルト位置で余白確保）
-      map.current.addControl(new mapboxgl.NavigationControl({
+      // ナビゲーションコントロール追加
+      const navControl = new mapboxgl.NavigationControl({
         showCompass: false,
         showZoom: true,
         visualizePitch: false
-      }), 'top-right');
+      });
+      map.current.addControl(navControl, 'top-right');
 
       // 地図ロード完了イベント
       map.current.on('load', () => {

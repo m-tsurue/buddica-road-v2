@@ -27,16 +27,16 @@ export default function Home() {
     if (searchQuery.trim()) {
       const params = new URLSearchParams()
       params.set('q', searchQuery)
-      window.location.href = `/search?${params.toString()}`
+      window.location.href = `/recommendations?${params.toString()}`
     }
   }
 
   const handleAreaSelect = (area: string) => {
     setSelectedArea(area)
-    // エリア選択でも検索画面に遷移
+    // エリア選択でおすすめスポット画面に遷移
     const params = new URLSearchParams()
     params.set('area', area)
-    window.location.href = `/search?${params.toString()}`
+    window.location.href = `/recommendations?${params.toString()}`
   }
 
   return (

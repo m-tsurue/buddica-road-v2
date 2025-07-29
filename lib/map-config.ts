@@ -11,7 +11,6 @@ export const mapboxConfig = {
   pitch: MAP_CONFIG.PITCH,
   bearing: MAP_CONFIG.BEARING,
   attributionControl: false,
-  logoPosition: 'bottom-left' as const,
   antialias: true,
   preserveDrawingBuffer: false,
   interactive: true,

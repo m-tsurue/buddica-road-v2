@@ -5,7 +5,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { X, MapPin, Star, Clock, Car, Plus, Check } from 'lucide-react'
 import { mockSpots, Spot } from '@/lib/mock-data'
 import { useSpotSelection } from '@/contexts/SpotSelectionContext'
-import { MapboxMap } from '@/components/map/MapboxMap'
+import { GoogleMap } from '@/components/map/GoogleMap'
 
 interface SpotDetailModalProps {
   spotId?: string | null
@@ -236,7 +236,7 @@ export default function SpotDetailModal({ spotId, spot: providedSpot, isOpen, on
                       
                       {/* 地図 */}
                       <div className="rounded-lg overflow-hidden">
-                        <MapboxMap 
+                        <GoogleMap 
                           spots={[spot]}
                           height="200px"
                           showRoute={false}
