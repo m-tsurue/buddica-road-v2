@@ -178,25 +178,27 @@ export default function RouteMapPage() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <h1 className="text-lg font-bold flex-1 text-center">ドライブルート</h1>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setIsSuggestModalOpen(true)}
-              className="flex items-center justify-center w-20 h-10 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-              title="寄り道提案"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 font-medium text-sm"
             >
               <motion.div
                 animate={{ 
-                  rotate: [0, 10, -10, 0],
-                  scale: [1, 1.1, 1]
+                  opacity: [0.5, 1, 0.5],
+                  scale: [1, 1.2, 1]
                 }}
                 transition={{ 
-                  duration: 3,
+                  duration: 1.5,
                   repeat: Infinity,
-                  repeatDelay: 2
+                  ease: "easeInOut"
                 }}
               >
-                <Star className="w-5 h-5 fill-current" />
+                <Sparkles className="w-4 h-4" />
               </motion.div>
-            </button>
+              <span>寄り道提案</span>
+            </motion.button>
           </div>
         </div>
       </header>
